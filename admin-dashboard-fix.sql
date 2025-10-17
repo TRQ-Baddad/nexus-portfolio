@@ -28,8 +28,8 @@ FROM content_articles;
 
 CREATE VIEW logs AS 
 SELECT 
-    id, event_type as type, details as description, 
-    metadata, severity, created_at
+    id, service as type, message as description, 
+    status, metric, severity, timestamp as created_at
 FROM system_events;
 
 -- Grant permissions on views
