@@ -15,8 +15,9 @@ DROP VIEW IF EXISTS logs CASCADE;
 -- Create proper views with all columns
 CREATE VIEW automations AS 
 SELECT 
-    id, name, description, trigger_type, conditions, actions,
-    is_active, last_run, created_at, updated_at
+    id, name, description, trigger_type, trigger_config, 
+    action_type, action_config, is_active, last_run_at, 
+    next_run_at, run_count, created_at, updated_at
 FROM automation_rules;
 
 CREATE VIEW articles AS 
