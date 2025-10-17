@@ -473,6 +473,33 @@ BEGIN
 END;
 $$;
 
+-- Function: Get recent activity feed (for admin dashboard)
+CREATE OR REPLACE FUNCTION get_recent_activity_feed()
+RETURNS TABLE (
+    id UUID,
+    type TEXT,
+    description TEXT,
+    user_email TEXT,
+    created_at TIMESTAMPTZ
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        al.id,
+        al.action as type,
+        COALESCE(al.details->>'description', al.action) as description,
+        u.email as user_email,
+        al.created_at
+    FROM admin_logs al
+    LEFT JOIN users u ON u.id = al.admin_id
+    ORDER BY al.created_at DESC
+    LIMIT 50;
+END;
+$$;
+
 -- =====================================================
 -- SECTION 6: TRIGGERS FOR AUTO-UPDATING TIMESTAMPS
 -- =====================================================
