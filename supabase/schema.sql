@@ -320,15 +320,10 @@ ALTER TABLE content_articles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE experiments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE automation_rules ENABLE ROW LEVEL SECURITY;
 
--- Users policies
+-- Users policies (simplified to avoid infinite recursion)
 CREATE POLICY "Users can view their own profile" ON users FOR SELECT USING (auth.uid() = id);
 CREATE POLICY "Users can update their own profile" ON users FOR UPDATE USING (auth.uid() = id);
-CREATE POLICY "Admins can view all users" ON users FOR SELECT USING (
-    EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role IN ('Administrator', 'Content Editor', 'Support Agent'))
-);
-CREATE POLICY "Admins can update all users" ON users FOR UPDATE USING (
-    EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'Administrator')
-);
+CREATE POLICY "Service role can manage users" ON users FOR ALL USING (auth.jwt()->>'role' = 'service_role');
 
 -- Wallets policies
 CREATE POLICY "Users can view their own wallets" ON wallets FOR SELECT USING (auth.uid() = user_id);
@@ -340,14 +335,9 @@ CREATE POLICY "Users can delete their own wallets" ON wallets FOR DELETE USING (
 CREATE POLICY "Users can view their own portfolio history" ON portfolio_history FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert their own portfolio history" ON portfolio_history FOR INSERT WITH CHECK (auth.uid() = user_id);
 
--- Whales policies (public read for featured, owner read/write for custom)
-CREATE POLICY "Anyone can view featured whales" ON whales FOR SELECT USING (is_featured = true OR is_custom = false);
-CREATE POLICY "Admins can manage all whales" ON whales FOR ALL USING (
-    EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'Administrator')
-);
-CREATE POLICY "Admins can insert whales" ON whales FOR INSERT WITH CHECK (
-    EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'Administrator')
-);
+-- Whales policies (public read for featured, admin write via service role)
+CREATE POLICY "Anyone can view whales" ON whales FOR SELECT USING (true);
+CREATE POLICY "Service role can manage whales" ON whales FOR ALL USING (auth.jwt()->>'role' = 'service_role');
 
 -- Token watchlist policies
 CREATE POLICY "Users can view their own watchlist" ON token_watchlist FOR SELECT USING (auth.uid() = user_id);
@@ -356,19 +346,13 @@ CREATE POLICY "Users can delete from their watchlist" ON token_watchlist FOR DEL
 
 -- Announcements policies
 CREATE POLICY "Active announcements are public" ON announcements FOR SELECT USING (status = 'Active');
-CREATE POLICY "Admins can manage announcements" ON announcements FOR ALL USING (
-    EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role IN ('Administrator', 'Content Editor'))
-);
+CREATE POLICY "Service role can manage announcements" ON announcements FOR ALL USING (auth.jwt()->>'role' = 'service_role');
 
 -- Support tickets policies
 CREATE POLICY "Users can view their own tickets" ON support_tickets FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can create tickets" ON support_tickets FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Support agents can view all tickets" ON support_tickets FOR SELECT USING (
-    EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role IN ('Administrator', 'Support Agent'))
-);
-CREATE POLICY "Support agents can update tickets" ON support_tickets FOR UPDATE USING (
-    EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role IN ('Administrator', 'Support Agent'))
-);
+CREATE POLICY "Users can update their tickets" ON support_tickets FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Service role can manage tickets" ON support_tickets FOR ALL USING (auth.jwt()->>'role' = 'service_role');
 
 -- Ticket replies policies
 CREATE POLICY "Users can view replies to their tickets" ON ticket_replies FOR SELECT USING (
@@ -377,38 +361,23 @@ CREATE POLICY "Users can view replies to their tickets" ON ticket_replies FOR SE
 CREATE POLICY "Users can reply to their tickets" ON ticket_replies FOR INSERT WITH CHECK (
     EXISTS (SELECT 1 FROM support_tickets WHERE id = ticket_id AND user_id = auth.uid())
 );
-CREATE POLICY "Support agents can view all replies" ON ticket_replies FOR SELECT USING (
-    EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role IN ('Administrator', 'Support Agent'))
-);
-CREATE POLICY "Support agents can reply to tickets" ON ticket_replies FOR INSERT WITH CHECK (
-    EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role IN ('Administrator', 'Support Agent'))
-);
+CREATE POLICY "Service role can manage replies" ON ticket_replies FOR ALL USING (auth.jwt()->>'role' = 'service_role');
 
--- Roles policies (read-only for authenticated users, admin-only write)
+-- Roles policies
 CREATE POLICY "Authenticated users can view roles" ON roles FOR SELECT USING (auth.uid() IS NOT NULL);
-CREATE POLICY "Admins can manage roles" ON roles FOR ALL USING (
-    EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'Administrator')
-);
+CREATE POLICY "Service role can manage roles" ON roles FOR ALL USING (auth.jwt()->>'role' = 'service_role');
 
 -- Settings policies
 CREATE POLICY "Authenticated users can view settings" ON settings FOR SELECT USING (auth.uid() IS NOT NULL);
-CREATE POLICY "Admins can manage settings" ON settings FOR ALL USING (
-    EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'Administrator')
-);
+CREATE POLICY "Service role can manage settings" ON settings FOR ALL USING (auth.jwt()->>'role' = 'service_role');
 
--- System events policies (admin only)
-CREATE POLICY "Admins can view system events" ON system_events FOR SELECT USING (
-    EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'Administrator')
-);
+-- System events policies
 CREATE POLICY "System can insert events" ON system_events FOR INSERT WITH CHECK (true);
+CREATE POLICY "Service role can manage events" ON system_events FOR ALL USING (auth.jwt()->>'role' = 'service_role');
 
--- Admin logs policies (admin only)
-CREATE POLICY "Admins can view admin logs" ON admin_logs FOR SELECT USING (
-    EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'Administrator')
-);
-CREATE POLICY "Admins can create logs" ON admin_logs FOR INSERT WITH CHECK (
-    EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role IN ('Administrator', 'Content Editor', 'Support Agent'))
-);
+-- Admin logs policies
+CREATE POLICY "Users can create logs" ON admin_logs FOR INSERT WITH CHECK (auth.uid() = admin_id);
+CREATE POLICY "Service role can manage logs" ON admin_logs FOR ALL USING (auth.jwt()->>'role' = 'service_role');
 
 -- Whale segments policies
 CREATE POLICY "Users can view their segments" ON whale_segments FOR SELECT USING (auth.uid() = user_id OR is_predefined = true);
@@ -416,23 +385,29 @@ CREATE POLICY "Users can manage their segments" ON whale_segments FOR ALL USING 
 
 -- Content articles policies
 CREATE POLICY "Published articles are public" ON content_articles FOR SELECT USING (status = 'Published');
-CREATE POLICY "Content editors can manage articles" ON content_articles FOR ALL USING (
-    EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role IN ('Administrator', 'Content Editor'))
-);
+CREATE POLICY "Service role can manage articles" ON content_articles FOR ALL USING (auth.jwt()->>'role' = 'service_role');
 
--- Experiments policies (admin only)
-CREATE POLICY "Admins can manage experiments" ON experiments FOR ALL USING (
-    EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'Administrator')
-);
+-- Experiments policies
+CREATE POLICY "Service role can manage experiments" ON experiments FOR ALL USING (auth.jwt()->>'role' = 'service_role');
 
--- Automation rules policies (admin only)
-CREATE POLICY "Admins can manage automation rules" ON automation_rules FOR ALL USING (
-    EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'Administrator')
-);
+-- Automation rules policies
+CREATE POLICY "Service role can manage automation" ON automation_rules FOR ALL USING (auth.jwt()->>'role' = 'service_role');
 
 -- =====================================================
 -- SECTION 5: DATABASE FUNCTIONS (RPC)
 -- =====================================================
+
+-- Helper function to get user role (avoids infinite recursion in policies)
+CREATE OR REPLACE FUNCTION auth.user_role()
+RETURNS TEXT
+LANGUAGE sql
+STABLE
+AS $$
+  SELECT COALESCE(
+    (SELECT role FROM public.users WHERE id = auth.uid()),
+    'Customer'
+  );
+$$;
 
 -- Function: Upgrade user to Pro plan
 CREATE OR REPLACE FUNCTION upgrade_user_plan()
