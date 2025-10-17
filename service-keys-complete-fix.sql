@@ -79,14 +79,66 @@ FROM service_keys;
 GRANT ALL ON service_keys TO authenticated, anon, service_role;
 GRANT ALL ON service_keys_view TO authenticated, anon, service_role;
 
+-- Create RPC function to update API keys by service name (avoids UUID issues)
+CREATE OR REPLACE FUNCTION update_service_key(
+    p_service_name TEXT,
+    p_api_key TEXT,
+    p_is_active BOOLEAN DEFAULT NULL
+)
+RETURNS service_keys AS $$
+DECLARE
+    v_result service_keys;
+BEGIN
+    -- Update or insert the service key
+    INSERT INTO service_keys (service_name, api_key, is_active)
+    VALUES (p_service_name, p_api_key, COALESCE(p_is_active, false))
+    ON CONFLICT (service_name) 
+    DO UPDATE SET 
+        api_key = EXCLUDED.api_key,
+        is_active = COALESCE(p_is_active, service_keys.is_active),
+        last_validated = NOW(),
+        updated_at = NOW()
+    RETURNING * INTO v_result;
+    
+    RETURN v_result;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Grant execute permission on the function
+GRANT EXECUTE ON FUNCTION update_service_key(TEXT, TEXT, BOOLEAN) TO authenticated, service_role;
+
+-- Create another function to get all service keys (for easier querying)
+CREATE OR REPLACE FUNCTION get_service_keys()
+RETURNS SETOF service_keys AS $$
+BEGIN
+    RETURN QUERY SELECT * FROM service_keys ORDER BY service_name;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Grant execute permission
+GRANT EXECUTE ON FUNCTION get_service_keys() TO authenticated, service_role;
+
 -- Verify the setup
 SELECT 
     id, service_name, 
-    LEFT(api_key, 20) || '...' as api_key_preview,
+    CASE 
+        WHEN api_key = 'not-configured' THEN 'not-configured'
+        ELSE LEFT(api_key, 10) || '***'
+    END as api_key_status,
     is_active, created_at
 FROM service_keys
 ORDER BY service_name;
 
 -- =====================================================
 -- DONE! Now refresh your admin dashboard
+-- =====================================================
+-- 
+-- The admin dashboard can now use these RPC functions:
+-- 
+-- 1. To update a key:
+--    SELECT update_service_key('Gemini', 'your-api-key-here', true);
+-- 
+-- 2. To get all keys:
+--    SELECT * FROM get_service_keys();
+--
 -- =====================================================
