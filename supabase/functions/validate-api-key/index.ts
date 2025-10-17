@@ -8,7 +8,7 @@ import { corsHeaders } from '../_shared/cors.ts';
 declare const Deno: any;
 
 const validateKey = async (serviceName: string, apiKey: string) => {
-    if (!apiKey) return false;
+    if (!apiKey || apiKey === 'not-configured') return false;
     let isValid = false;
 
     try {
@@ -16,9 +16,15 @@ const validateKey = async (serviceName: string, apiKey: string) => {
             case 'Gemini': {
                 const ai = new GoogleGenerativeAI(apiKey);
                 const model = ai.getGenerativeModel({ model: 'gemini-1.5-flash' });
-                const result = await model.generateContent('test');
+                // Simple test with timeout
+                const result = await Promise.race([
+                    model.generateContent('Hello'),
+                    new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 10000))
+                ]);
                 const response = await result.response;
-                isValid = !!response;
+                const text = response.text();
+                isValid = text.length > 0;
+                console.log('Gemini validation successful:', text.substring(0, 50));
                 break;
             }
             case 'Moralis': {
