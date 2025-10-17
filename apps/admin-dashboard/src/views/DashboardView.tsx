@@ -87,16 +87,17 @@ type ActivityEvent = {
 };
 
 const ActivityEventRow: React.FC<{ event: ActivityEvent }> = ({ event }) => {
-    const eventMeta = {
+    const eventMeta: Record<string, { icon: React.FC<any>, color: string }> = {
         signup: { icon: UsersIcon, color: 'text-blue-500' },
         upgrade: { icon: ZapIcon, color: 'text-purple-500' },
         new_ticket: { icon: LifeBuoyIcon, color: 'text-yellow-500' },
         new_whale: { icon: FishIcon, color: 'text-cyan-500' },
     };
-    const Icon = eventMeta[event.type].icon;
+    const eventData = eventMeta[event.type] || { icon: () => null, color: 'text-gray-500' };
+    const Icon = eventData.icon;
     return (
         <div className="flex items-center space-x-3 p-3 animate-fade-in">
-            <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-neutral-100 dark:bg-neutral-900 ${eventMeta[event.type].color}`}>
+            <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-neutral-100 dark:bg-neutral-900 ${eventData.color}`}>
                 <Icon className="w-5 h-5" />
             </div>
             <div className="flex-grow">
