@@ -64,7 +64,8 @@ CREATE TABLE IF NOT EXISTS service_keys (
 -- Enable RLS on service_keys
 ALTER TABLE service_keys ENABLE ROW LEVEL SECURITY;
 
--- Only service role can manage API keys (for security)
+-- Drop existing policy if it exists, then create it
+DROP POLICY IF EXISTS "Service role can manage service keys" ON service_keys;
 CREATE POLICY "Service role can manage service keys" ON service_keys 
     FOR ALL USING (auth.jwt()->>'role' = 'service_role');
 
