@@ -52,7 +52,7 @@ GRANT ALL ON service_keys_view TO authenticated, anon, service_role;
 
 -- Service keys table for API key management
 CREATE TABLE IF NOT EXISTS service_keys (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     service_name TEXT NOT NULL UNIQUE,
     api_key TEXT NOT NULL,
     key_value TEXT,  -- Alias column for compatibility
