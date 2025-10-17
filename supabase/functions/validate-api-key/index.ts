@@ -2,7 +2,7 @@
 // FIX: Switched to the official, recommended esm.sh CDN for Supabase function types to resolve type definition errors.
 /// <reference types="https://esm.sh/@supabase/functions-js@2" />
 import { serve } from 'https://deno.land/std@0.224.0/http/server.ts';
-import { GoogleGenAI } from 'https://unpkg.com/@google/genai@1.24.0/deno/genai.js';
+import { GoogleGenerativeAI } from 'npm:@google/generative-ai@0.21.0';
 import { corsHeaders } from '../_shared/cors.ts';
 
 declare const Deno: any;
@@ -14,16 +14,10 @@ const validateKey = async (serviceName: string, apiKey: string) => {
     try {
         switch (serviceName) {
             case 'Gemini': {
-                const ai = new GoogleGenAI({ apiKey });
-                // Use a simple, non-intensive call to validate the key.
-                // The library will throw an error on an invalid key, which will be caught.
-                const response = await ai.models.generateContent({
-                    model: 'gemini-2.5-flash',
-                    contents: 'test',
-                    config: {
-                        maxOutputTokens: 1, // Minimize token usage
-                    },
-                });
+                const ai = new GoogleGenerativeAI(apiKey);
+                const model = ai.getGenerativeModel({ model: 'gemini-1.5-flash' });
+                const result = await model.generateContent('test');
+                const response = await result.response;
                 isValid = !!response;
                 break;
             }
