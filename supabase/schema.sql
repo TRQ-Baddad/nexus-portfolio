@@ -541,6 +541,33 @@ CREATE TRIGGER update_experiments_updated_at BEFORE UPDATE ON experiments
 CREATE TRIGGER update_automation_rules_updated_at BEFORE UPDATE ON automation_rules
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+-- Function to auto-create user profile on signup
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+    INSERT INTO public.users (id, email, name, created_at, updated_at)
+    VALUES (
+        NEW.id,
+        NEW.email,
+        COALESCE(NEW.raw_user_meta_data->>'name', split_part(NEW.email, '@', 1)),
+        NOW(),
+        NOW()
+    )
+    ON CONFLICT (id) DO NOTHING;
+    RETURN NEW;
+END;
+$$;
+
+-- Trigger to create user profile automatically on signup
+CREATE TRIGGER on_auth_user_created
+    AFTER INSERT ON auth.users
+    FOR EACH ROW
+    EXECUTE FUNCTION public.handle_new_user();
+
 -- =====================================================
 -- SECTION 7: STORAGE BUCKETS CONFIGURATION
 -- =====================================================
