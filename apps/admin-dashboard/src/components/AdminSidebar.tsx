@@ -80,17 +80,15 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ appName, activeView,
             <Skeleton className="h-10 w-full" />
           </div>
         ) : (
-          NAV_ITEMS.map(item => 
-            hasPermission(item.category, 'view') && (
-              <NavItem 
-                key={item.view}
-                label={item.label} 
-                icon={item.icon} 
-                isActive={activeView === item.view} 
-                onClick={() => setActiveView(item.view)} 
-              />
-            )
-          )
+          NAV_ITEMS.filter(item => hasPermission(item.category, 'view')).map(item => (
+            <NavItem 
+              key={item.view}
+              label={item.label} 
+              icon={item.icon} 
+              isActive={activeView === item.view} 
+              onClick={() => setActiveView(item.view)} 
+            />
+          ))
         )}
       </nav>
     </>
