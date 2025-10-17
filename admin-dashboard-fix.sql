@@ -135,13 +135,13 @@ SELECT id, email, name, role, plan, status FROM users WHERE email = 'vfx.tariq@g
 -- Add a sample announcement
 INSERT INTO announcements (title, message, type, status)
 VALUES 
-    ('Welcome to Nexus Portfolio', 'Your multi-chain crypto portfolio tracker is ready!', 'Info', 'Active')
+    ('Welcome to Nexus Portfolio', 'Your multi-chain crypto portfolio tracker is ready!', 'info', 'Active')
 ON CONFLICT DO NOTHING;
 
 -- Add a sample system event
-INSERT INTO system_events (event_type, details, severity)
+INSERT INTO system_events (service, status, message, severity)
 VALUES 
-    ('admin_login', '{"message": "Admin dashboard initialized"}', 'info')
+    ('Admin Dashboard', 'Operational', 'Admin dashboard initialized successfully', 'info')
 ON CONFLICT DO NOTHING;
 
 -- =====================================================
