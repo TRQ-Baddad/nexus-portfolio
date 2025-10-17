@@ -148,12 +148,26 @@ CREATE TABLE IF NOT EXISTS service_keys (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     service_name TEXT NOT NULL UNIQUE,
     api_key TEXT NOT NULL,
-    key_value TEXT GENERATED ALWAYS AS (api_key) STORED,
+    key_value TEXT,
     is_active BOOLEAN DEFAULT true,
     last_validated TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Trigger to keep key_value in sync with api_key
+CREATE OR REPLACE FUNCTION sync_key_value()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.key_value := NEW.api_key;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER sync_service_keys_key_value
+    BEFORE INSERT OR UPDATE OF api_key ON service_keys
+    FOR EACH ROW
+    EXECUTE FUNCTION sync_key_value();
 
 -- System events - System health monitoring and logs
 CREATE TABLE IF NOT EXISTS system_events (

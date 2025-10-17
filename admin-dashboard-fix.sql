@@ -55,22 +55,27 @@ CREATE TABLE IF NOT EXISTS service_keys (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     service_name TEXT NOT NULL UNIQUE,
     api_key TEXT NOT NULL,
+    key_value TEXT,  -- Alias column for compatibility
     is_active BOOLEAN DEFAULT true,
     last_validated TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Add key_value column if it doesn't exist (for admin dashboard compatibility)
-DO $$ 
+-- Create trigger to keep key_value in sync with api_key
+CREATE OR REPLACE FUNCTION sync_key_value()
+RETURNS TRIGGER AS $$
 BEGIN
-    IF NOT EXISTS (
-        SELECT 1 FROM information_schema.columns 
-        WHERE table_name = 'service_keys' AND column_name = 'key_value'
-    ) THEN
-        ALTER TABLE service_keys ADD COLUMN key_value TEXT GENERATED ALWAYS AS (api_key) STORED;
-    END IF;
-END $$;
+    NEW.key_value := NEW.api_key;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS sync_service_keys_key_value ON service_keys;
+CREATE TRIGGER sync_service_keys_key_value
+    BEFORE INSERT OR UPDATE OF api_key ON service_keys
+    FOR EACH ROW
+    EXECUTE FUNCTION sync_key_value();
 
 -- Enable RLS on service_keys
 ALTER TABLE service_keys ENABLE ROW LEVEL SECURITY;
