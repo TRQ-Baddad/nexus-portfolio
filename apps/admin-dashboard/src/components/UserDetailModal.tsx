@@ -93,7 +93,7 @@ const UserActivityLog: React.FC<{ userId: string }> = ({ userId }) => {
             if (!userId) return;
             setLoading(true);
             const { data, error } = await supabase
-                .from('admin_audit_log')
+                .from('admin_logs')
                 .select('*')
                 .eq('target_user_id', userId)
                 .order('created_at', { ascending: false })

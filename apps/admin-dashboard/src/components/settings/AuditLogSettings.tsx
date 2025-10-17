@@ -53,7 +53,7 @@ export const AuditLogSettings: React.FC = () => {
         const to = from + ITEMS_PER_PAGE - 1;
 
         let query = supabase
-            .from('admin_audit_log')
+            .from('admin_logs')
             .select('*', { count: 'exact' });
         
         if (searchQuery) {

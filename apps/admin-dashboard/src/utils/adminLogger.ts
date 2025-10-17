@@ -22,12 +22,11 @@ export const logAdminAction = async (
       return;
     }
 
-    const { error } = await supabase.from('admin_audit_log').insert({
-      admin_user_id: user.id,
-      admin_user_email: user.email,
+    const { error } = await supabase.from('admin_logs').insert({
+      admin_id: user.id,
       action: action,
       target_user_id: targetUserId,
-      details: details || null,
+      details: details || {},
     });
 
     if (error) {
