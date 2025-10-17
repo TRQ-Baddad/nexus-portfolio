@@ -500,6 +500,50 @@ BEGIN
 END;
 $$;
 
+-- Function: Get recent transactions (placeholder - returns empty for now)
+CREATE OR REPLACE FUNCTION get_recent_transactions()
+RETURNS TABLE (
+    id UUID,
+    user_id UUID,
+    user_email TEXT,
+    amount NUMERIC,
+    type TEXT,
+    status TEXT,
+    created_at TIMESTAMPTZ
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+    -- Returns empty set for now since transactions are not stored in DB
+    -- They're fetched from blockchain APIs in real-time
+    RETURN;
+END;
+$$;
+
+-- Function: Get all transactions (placeholder)
+CREATE OR REPLACE FUNCTION get_all_transactions(
+    search_query TEXT DEFAULT NULL,
+    type_filter TEXT DEFAULT NULL
+)
+RETURNS TABLE (
+    id UUID,
+    user_id UUID,
+    user_email TEXT,
+    amount NUMERIC,
+    type TEXT,
+    status TEXT,
+    created_at TIMESTAMPTZ
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+    -- Returns empty set for now
+    RETURN;
+END;
+$$;
+
 -- =====================================================
 -- SECTION 6: TRIGGERS FOR AUTO-UPDATING TIMESTAMPS
 -- =====================================================
@@ -591,6 +635,20 @@ CREATE POLICY "Users can update their own avatars" ON storage.objects FOR UPDATE
 
 CREATE POLICY "Users can delete their own avatars" ON storage.objects FOR DELETE
     USING (bucket_id = 'avatars' AND auth.uid()::text = (storage.foldername(name))[1]);
+
+-- =====================================================
+-- SECTION 7B: TABLE ALIASES (VIEWS) FOR ADMIN DASHBOARD
+-- =====================================================
+
+-- Create view alias for automation_rules as automations
+CREATE OR REPLACE VIEW automations AS SELECT * FROM automation_rules;
+
+-- Create view alias for content_articles as articles  
+CREATE OR REPLACE VIEW articles AS SELECT * FROM content_articles;
+
+-- Grant permissions on views
+GRANT SELECT, INSERT, UPDATE, DELETE ON automations TO authenticated, service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON articles TO authenticated, service_role;
 
 -- =====================================================
 -- SECTION 8: INITIAL SEED DATA
