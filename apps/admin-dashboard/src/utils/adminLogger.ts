@@ -22,8 +22,16 @@ export const logAdminAction = async (
       return;
     }
 
+    // Fetch user name from users table
+    const { data: userData } = await supabase
+      .from('users')
+      .select('name, email')
+      .eq('id', user.id)
+      .single();
+
     const { error } = await supabase.from('admin_logs').insert({
       admin_id: user.id,
+      admin_name: userData?.name || userData?.email || user.email || 'Unknown Admin',
       action: action,
       target_user_id: targetUserId,
       details: details || {},
