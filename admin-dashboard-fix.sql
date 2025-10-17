@@ -29,13 +29,22 @@ FROM content_articles;
 CREATE VIEW logs AS 
 SELECT 
     id, service as type, message as description, 
-    status, metric, severity, timestamp as created_at
+    status, metric, severity, timestamp as created_at,
+    timestamp  -- Keep original timestamp column too
 FROM system_events;
+
+-- Create view for service_keys with column alias for compatibility
+CREATE OR REPLACE VIEW public.service_keys_view AS
+SELECT 
+    id, service_name, api_key, api_key as key_value,
+    is_active, last_validated, created_at, updated_at
+FROM service_keys;
 
 -- Grant permissions on views
 GRANT ALL ON automations TO authenticated, anon, service_role;
 GRANT ALL ON articles TO authenticated, anon, service_role;
 GRANT ALL ON logs TO authenticated, anon, service_role;
+GRANT ALL ON service_keys_view TO authenticated, anon, service_role;
 
 -- =====================================================
 -- PART 1B: Create Missing Tables
