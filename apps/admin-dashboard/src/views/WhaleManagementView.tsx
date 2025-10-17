@@ -28,7 +28,7 @@ const ToggleSwitch: React.FC<{ enabled: boolean; onChange: () => void; }> = ({ e
 
 const WhaleRow: React.FC<{ whale: WhaleWallet; onEdit: () => void; onDelete: () => void; onToggleFeatured: () => void; onRefresh: () => void; isRefreshing: boolean; }> = ({ whale, onEdit, onDelete, onToggleFeatured, onRefresh, isRefreshing }) => {
     const isPositive = whale.change24h >= 0;
-    const ChainIcon = BLOCKCHAIN_METADATA[whale.blockchain].icon;
+    const ChainIcon = BLOCKCHAIN_METADATA[whale.blockchain]?.icon || (() => null);
 
     return (
         <tr className="border-b border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50/50 dark:hover:bg-neutral-800/50 transition-colors text-sm">

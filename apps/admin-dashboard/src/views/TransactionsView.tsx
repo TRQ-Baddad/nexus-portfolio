@@ -22,7 +22,7 @@ const ALL_TYPES: TransactionType[] = ['send', 'receive', 'swap'];
 
 const TransactionRow: React.FC<{ tx: AdminTransaction, significanceThreshold: number }> = ({ tx, significanceThreshold }) => {
     const { user, type, tokenSymbol, amount, valueUsd, chain, date, hash } = tx;
-    const ChainIcon = BLOCKCHAIN_METADATA[chain].icon;
+    const ChainIcon = BLOCKCHAIN_METADATA[chain]?.icon || (() => null);
     const isSignificant = valueUsd >= significanceThreshold;
     
     const typeMeta: Record<TransactionType, { icon: React.FC<any>, color: string, label: string }> = {

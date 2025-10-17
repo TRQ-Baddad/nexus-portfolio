@@ -112,7 +112,7 @@ export const ManageWhaleModal: React.FC<ManageWhaleModalProps> = ({ isOpen, onCl
                     <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                         {chainOptions.map(chain => {
                             const metadata = BLOCKCHAIN_METADATA[chain];
-                            const Icon = metadata.icon;
+                            const Icon = metadata?.icon || (() => null);
                             return (
                                 <button
                                     key={chain}

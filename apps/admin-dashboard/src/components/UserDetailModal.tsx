@@ -165,7 +165,7 @@ const UserDetailContent: React.FC<{ user: ManagedUser; onSuspend: (userId: strin
                         Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)
                     ) : wallets.length > 0 ? wallets.map(wallet => {
                          const metadata = BLOCKCHAIN_METADATA[wallet.blockchain];
-                         const Icon = metadata.icon;
+                         const Icon = metadata?.icon || (() => null);
                          return (
                              <div key={wallet.id} className="flex items-center space-x-3 p-2 bg-neutral-50 dark:bg-neutral-800/50 rounded-md">
                                  <Icon className="w-6 h-6" />
