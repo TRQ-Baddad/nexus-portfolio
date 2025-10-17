@@ -38,6 +38,36 @@ GRANT ALL ON articles TO authenticated, anon, service_role;
 GRANT ALL ON logs TO authenticated, anon, service_role;
 
 -- =====================================================
+-- PART 1B: Create Missing Tables
+-- =====================================================
+
+-- Service keys table for API key management
+CREATE TABLE IF NOT EXISTS service_keys (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    service_name TEXT NOT NULL UNIQUE,
+    api_key TEXT NOT NULL,
+    is_active BOOLEAN DEFAULT true,
+    last_validated TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Enable RLS on service_keys
+ALTER TABLE service_keys ENABLE ROW LEVEL SECURITY;
+
+-- Only service role can manage API keys (for security)
+CREATE POLICY "Service role can manage service keys" ON service_keys 
+    FOR ALL USING (auth.jwt()->>'role' = 'service_role');
+
+-- Insert default service key placeholders
+INSERT INTO service_keys (service_name, api_key, is_active) VALUES
+    ('Moralis', 'not-configured', false),
+    ('Helius', 'not-configured', false),
+    ('CoinGecko', 'not-configured', true),  -- CoinGecko free tier doesn't need key
+    ('Gemini', 'not-configured', false)
+ON CONFLICT (service_name) DO NOTHING;
+
+-- =====================================================
 -- PART 2: Add Missing RPC Functions
 -- =====================================================
 

@@ -143,6 +143,17 @@ CREATE TABLE IF NOT EXISTS settings (
     updated_by UUID REFERENCES users(id)
 );
 
+-- Service keys - API key management for external services
+CREATE TABLE IF NOT EXISTS service_keys (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    service_name TEXT NOT NULL UNIQUE,
+    api_key TEXT NOT NULL,
+    is_active BOOLEAN DEFAULT true,
+    last_validated TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- System events - System health monitoring and logs
 CREATE TABLE IF NOT EXISTS system_events (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -313,6 +324,7 @@ ALTER TABLE support_tickets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ticket_replies ENABLE ROW LEVEL SECURITY;
 ALTER TABLE roles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE settings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE service_keys ENABLE ROW LEVEL SECURITY;
 ALTER TABLE system_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE admin_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE whale_segments ENABLE ROW LEVEL SECURITY;
@@ -370,6 +382,9 @@ CREATE POLICY "Service role can manage roles" ON roles FOR ALL USING (auth.jwt()
 -- Settings policies
 CREATE POLICY "Authenticated users can view settings" ON settings FOR SELECT USING (auth.uid() IS NOT NULL);
 CREATE POLICY "Service role can manage settings" ON settings FOR ALL USING (auth.jwt()->>'role' = 'service_role');
+
+-- Service keys policies (admin only via service role)
+CREATE POLICY "Service role can manage service keys" ON service_keys FOR ALL USING (auth.jwt()->>'role' = 'service_role');
 
 -- System events policies
 CREATE POLICY "System can insert events" ON system_events FOR INSERT WITH CHECK (true);
@@ -707,6 +722,14 @@ INSERT INTO whales (name, address, blockchain, description, total_value, change_
 ('Wintermute Trading', '0x00000000ae347930bd1e7b0f35588b92280f9e75', 'ethereum', 'Leading algorithmic trading firm in crypto', 0, 0, false, true),
 ('Justin Sun', 'TLa2f6VPqDgRE67v1736s7bJ8Ray5wYjU7', 'solana', 'Founder of TRON and crypto entrepreneur', 0, 0, false, true)
 ON CONFLICT (address, blockchain) DO NOTHING;
+
+-- Insert default service keys (placeholders)
+INSERT INTO service_keys (service_name, api_key, is_active) VALUES
+('Moralis', 'not-configured', false),
+('Helius', 'not-configured', false),
+('CoinGecko', 'not-configured', true),
+('Gemini', 'not-configured', false)
+ON CONFLICT (service_name) DO NOTHING;
 
 -- =====================================================
 -- SCHEMA VERSION & COMPLETION
