@@ -254,7 +254,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setActiveView }) =
                 supabase.from('wallets').select('*', { count: 'exact', head: true }),
                 supabase.from('users').select('*', { count: 'exact', head: true }).eq('plan', 'Pro'),
                 supabase.rpc('get_recent_activity_feed'),
-                supabase.from('system_events').select('*').in('level', ['WARN', 'ERROR']).order('created_at', { ascending: false }).limit(3),
+                supabase.from('system_events').select('*').in('severity', ['warning', 'error', 'critical']).order('timestamp', { ascending: false }).limit(3),
                 supabase.from('support_tickets').select('id, created_at, user_name, subject').order('created_at', { ascending: false }).limit(5),
                 supabase.from('whales').select('id, created_at, name').order('created_at', { ascending: false }).limit(5)
             ]);
@@ -311,7 +311,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setActiveView }) =
                     setStats(prev => ({ ...prev, wallets: prev.wallets - 1 }));
                     triggerStatUpdateAnimation('wallets', 'down');
                 })
-                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'system_events', filter: 'level=in.(WARN,ERROR)' }, (payload) => {
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'system_events', filter: 'severity=in.(warning,error,critical)' }, (payload) => {
                     setSystemAlerts(prev => [payload.new as SystemEvent, ...prev].slice(0, 3));
                 })
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'support_tickets' }, (payload) => {
