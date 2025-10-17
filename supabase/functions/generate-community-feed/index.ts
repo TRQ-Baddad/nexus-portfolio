@@ -4,7 +4,7 @@
 // FIX: Switched to the official, recommended esm.sh CDN for Supabase function types to resolve type definition errors.
 /// <reference types="https://esm.sh/@supabase/functions-js@2" />
 import { serve } from 'https://deno.land/std@0.224.0/http/server.ts';
-import { GoogleGenAI } from 'https://unpkg.com/@google/genai@1.24.0/deno/genai.js';
+import { GoogleGenerativeAI } from 'npm:@google/generative-ai@0.21.0';
 import { corsHeaders } from '../_shared/cors.ts';
 
 // Provide a Deno global type for local development environments.
@@ -26,17 +26,12 @@ serve(async (req: Request) => {
       });
     }
 
-    const ai = new GoogleGenAI({ apiKey });
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-      config: {
-        responseMimeType: 'application/json',
-        responseSchema: schema,
-      },
-    });
+    const ai = new GoogleGenerativeAI(apiKey);
+    const model = ai.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
     
-    const resultText = response.text.trim();
+    const resultText = response.text().trim();
     const parsedResult = JSON.parse(resultText);
 
     return new Response(JSON.stringify(parsedResult), {
