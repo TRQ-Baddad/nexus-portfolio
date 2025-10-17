@@ -61,6 +61,17 @@ CREATE TABLE IF NOT EXISTS service_keys (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Add key_value column if it doesn't exist (for admin dashboard compatibility)
+DO $$ 
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'service_keys' AND column_name = 'key_value'
+    ) THEN
+        ALTER TABLE service_keys ADD COLUMN key_value TEXT GENERATED ALWAYS AS (api_key) STORED;
+    END IF;
+END $$;
+
 -- Enable RLS on service_keys
 ALTER TABLE service_keys ENABLE ROW LEVEL SECURITY;
 

@@ -148,6 +148,7 @@ CREATE TABLE IF NOT EXISTS service_keys (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     service_name TEXT NOT NULL UNIQUE,
     api_key TEXT NOT NULL,
+    key_value TEXT GENERATED ALWAYS AS (api_key) STORED,
     is_active BOOLEAN DEFAULT true,
     last_validated TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
