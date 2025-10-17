@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="data:image/svg+xml,%3csvg viewBox=%270 0 24 24%27 fill=%27none%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3cdefs%3e%3clinearGradient id=%27grad1%27 x1=%270%25%27 y1=%270%25%27 x2=%27100%25%27 y2=%27100%25%27%3e%3cstop offset=%270%25%27 style=%27stop-color:%232563EB;stop-opacity:1%27 /%3e%3cstop offset=%27100%25%27 style=%27stop-color:%239333EA;stop-opacity:1%27 /%3e%3c/linearGradient%3e%3c/defs%3e%3cpath d=%27M12 2L4 6L12 10L20 6L12 2Z%27 fill=%27url(%23grad1)%27 /%3e%3cpath d=%27M4 18L12 22L20 18%27 stroke=%27url(%23grad1)%27 stroke-width=%271.5%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3e%3cpath d=%27M4 12L12 16L20 12%27 stroke=%27url(%23grad1)%27 stroke-width=%271.5%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3e%3c/svg%3e" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nexus Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --color-brand-blue: #2563EB;
+        --color-brand-purple: #9333EA;
+        --color-bg-neutral-50: #F9FAFB;
+        --color-bg-neutral-100: #F3F4F6;
+        --color-bg-neutral-900: #111827;
+
+        --color-text-neutral-900: #111827;
+        --color-text-neutral-100: #F3F4F6;
+      }
+      html.dark {
+        --color-bg-neutral-50: #1F2937;
+        --color-bg-neutral-100: #111827;
+        --color-bg-neutral-900: #111827;
+        
+        --color-text-neutral-900: #F9FAFB;
+        --color-text-neutral-100: #F9FAFB;
+      }
+
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(8px) scale(0.98);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+      .animate-fade-in {
+        animation: fadeIn 0.4s ease-out forwards;
+      }
+
+      /* Widget float-in animations */
+      @keyframes float-in-tl { /* top-left */
+        from { opacity: 0; transform: translate(-20px, -20px); }
+        to { opacity: 1; transform: translate(0, 0); }
+      }
+      @keyframes float-in-bl { /* bottom-left */
+        from { opacity: 0; transform: translate(-20px, 20px); }
+        to { opacity: 1; transform: translate(0, 0); }
+      }
+      @keyframes float-in-tr { /* top-right */
+        from { opacity: 0; transform: translate(20px, -20px); }
+        to { opacity: 1; transform: translate(0, 0); }
+      }
+      @keyframes float-in-br { /* bottom-right */
+        from { opacity: 0; transform: translate(20px, 20px); }
+        to { opacity: 1; transform: translate(0, 0); }
+      }
+      @keyframes float-in-center {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+      }
+
+      @keyframes background-pan {
+        0% { background-position: 0% center; }
+        100% { background-position: -200% center; }
+      }
+
+      @keyframes fade-in-up {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      @keyframes bounce {
+        0%, 100% { transform: translateY(-25%); animation-timing-function: cubic-bezier(0.8, 0, 1, 1); }
+        50% { transform: translateY(0); animation-timing-function: cubic-bezier(0, 0, 0.2, 1); }
+      }
+
+      .animate-on-scroll {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+      }
+      .animate-on-scroll.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      
+      @keyframes idle-pulse {
+        0%, 100% { transform: scale(1); opacity: 0.2; }
+        50% { transform: scale(1.05); opacity: 0.3; }
+      }
+      @keyframes listening-breath {
+        0%, 100% { transform: scaleY(1) translateY(0); }
+        50% { transform: scaleY(1.1) translateY(-2px); }
+      }
+      @keyframes speaking-wave {
+        0% { transform: scaleY(0.4); }
+        25% { transform: scaleY(1); }
+        50% { transform: scaleY(0.6); }
+        75% { transform: scaleY(0.8); }
+        100% { transform: scaleY(0.4); }
+      }
+       @keyframes thinking-pulse {
+        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7); }
+        70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(37, 99, 235, 0); }
+        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+      }
+      
+      @keyframes fab-pulse {
+        0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7); }
+        70% { box-shadow: 0 0 0 15px rgba(37, 99, 235, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+      }
+
+      /* Updated Animations for WelcomeAI */
+      @keyframes subtle-pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.03); }
+      }
+      
+      @keyframes blink-cursor {
+        50% { opacity: 0; }
+      }
+
+      @keyframes blob-1 {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        25% { transform: translate(20%, -30%) scale(1.1); }
+        50% { transform: translate(-15%, 25%) scale(0.9); }
+        75% { transform: translate(10%, 10%) scale(1.2); }
+      }
+      @keyframes blob-2 {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        25% { transform: translate(-25%, 15%) scale(1.2); }
+        50% { transform: translate(30%, -20%) scale(0.8); }
+        75% { transform: translate(5%, 5%) scale(1.1); }
+      }
+      @keyframes blob-3 {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        25% { transform: translate(15%, 25%) scale(0.9); }
+        50% { transform: translate(-20%, -25%) scale(1.1); }
+        75% { transform: translate(-5%, 10%) scale(1); }
+      }
+      @keyframes blob-4 {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        25% { transform: translate(-10%, -10%) scale(1.1); }
+        50% { transform: translate(10%, 15%) scale(0.9); }
+        75% { transform: translate(5%, -5%) scale(1); }
+      }
+      
+      /* New aurora background animation */
+      @keyframes blob {
+          0% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(30px, -50px) scale(1.1); }
+          66% { transform: translate(-20px, 20px) scale(0.9); }
+          100% { transform: translate(0px, 0px) scale(1); }
+      }
+      .animate-blob { animation: blob 15s infinite ease-in-out; }
+      .animation-delay-2000 { animation-delay: -2s; }
+      .animation-delay-4000 { animation-delay: -4s; }
+
+
+      .bg-grid-neutral-200\/\[0\.4\] {
+        background-image: linear-gradient(to right, rgba(229, 231, 235, 0.4) 1px, transparent 1px), linear-gradient(to bottom, rgba(229, 231, 235, 0.4) 1px, transparent 1px);
+        background-size: 3rem 3rem;
+      }
+      .dark .dark\:bg-grid-neutral-800\/\[0\.4\] {
+        background-image: linear-gradient(to right, rgba(31, 41, 55, 0.4) 1px, transparent 1px), linear-gradient(to bottom, rgba(31, 41, 55, 0.4) 1px, transparent 1px);
+        background-size: 3rem 3rem;
+      }
+
+
+      /* Admin dashboard stat animations */
+      @keyframes flash-green {
+        0%, 100% { background-color: transparent; }
+        50% { background-color: rgba(16, 185, 129, 0.2); }
+      }
+      .animate-flash-green { animation: flash-green 1s ease-out; }
+      
+      @keyframes flash-red {
+        0%, 100% { background-color: transparent; }
+        50% { background-color: rgba(239, 68, 68, 0.2); }
+      }
+      .animate-flash-red { animation: flash-red 1s ease-out; }
+
+      @keyframes tick-up {
+        0% { transform: translateY(0); opacity: 1; }
+        50% { transform: translateY(-8px); opacity: 0; }
+        51% { transform: translateY(8px); opacity: 0; }
+        100% { transform: translateY(0); opacity: 1; }
+      }
+      .animate-tick-up { animation: tick-up 0.5s ease-in-out; }
+
+    </style>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              mono: ['JetBrains Mono', 'monospace'],
+            },
+            colors: {
+              'brand-blue': 'var(--color-brand-blue)',
+              'brand-purple': 'var(--color-brand-purple)',
+              'brand-orange': '#f97316',
+              'dark-bg': '#0d0d0d',
+              'header-bg': '#262626',
+              'card-bg': '#111111',
+              'success': '#10B981',
+              'error': '#EF4444',
+              'warning': '#F59E0B',
+              'neutral-900': '#111827',
+              'neutral-800': '#1F2937',
+              'neutral-700': '#374151',
+              'neutral-600': '#4B5563',
+              'neutral-300': '#D1D5DB',
+              'neutral-200': '#E5E7EB',
+              'neutral-100': '#F3F4F6',
+              'neutral-50': '#F9FAFB',
+            },
+          }
+        }
+      }
+    </script>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.24.0",
+    "html-to-image": "https://aistudiocdn.com/html-to-image@^1.11.13",
+    "@supabase/supabase-js": "https://aistudiocdn.com/@supabase/supabase-js@^2.45.0",
+    "@vercel/speed-insights/react": "https://aistudiocdn.com/@vercel/speed-insights@^1.2.0/dist/react.mjs",
+    "@vercel/speed-insights/": "https://aistudiocdn.com/@vercel/speed-insights@^1.2.0/",
+    "react-dom": "https://aistudiocdn.com/react-dom@^19.2.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="bg-dark-bg" style="background-color: var(--color-bg-neutral-100)">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,7 @@
+{
+  "name": "Nexus Portfolio",
+  "description": "A multi-chain crypto portfolio tracker that aggregates assets from Ethereum, Solana, Bitcoin, and other blockchains into a single, beautiful dashboard.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
