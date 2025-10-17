@@ -103,7 +103,8 @@ export const ApiKeysSettings: React.FC = () => {
             setIsLoading(true);
             const { data, error } = await supabase.from('service_keys').select('*');
             if (data) {
-                const keysMap = data.reduce((acc, curr) => ({...acc, [curr.id]: curr.key_value }), {});
+                // Use service_name as key, not id
+                const keysMap = data.reduce((acc, curr) => ({...acc, [curr.service_name]: curr.api_key }), {});
                 setApiKeys(keysMap);
             }
             if (error) console.error("Error fetching API keys:", error);
@@ -113,7 +114,12 @@ export const ApiKeysSettings: React.FC = () => {
     }, []);
 
     const handleSaveKey = async (name: string, value: string): Promise<boolean> => {
-        const { error } = await supabase.from('service_keys').upsert({ id: name, key_value: value });
+        // Use RPC function to avoid UUID errors
+        const { data, error } = await supabase.rpc('update_service_key', {
+            p_service_name: name,
+            p_api_key: value,
+            p_is_active: value !== 'not-configured'
+        });
         if (error) {
             console.error(`Error saving ${name} key:`, error);
             alert(`Failed to save ${name} key.`);
