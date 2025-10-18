@@ -212,10 +212,14 @@ function normalizeBitcoinTx(tx: any, wallet: Wallet): Partial<Transaction> | nul
 // --- CHAIN-SPECIFIC DATA FETCHERS ---
 
 async function fetchEvmAssets(wallets: Wallet[], apiKey: string): Promise<{ tokens: Partial<Token>[], nfts: NFT[], transactions: Partial<Transaction>[], defiPositions: DeFiPosition[] }> {
+    console.log('[Moralis Debug] API Key received:', apiKey ? `${apiKey.slice(0, 10)}...` : 'MISSING');
+    console.log('[Moralis Debug] Wallets to fetch:', wallets.length);
+    
     const headers = { 'accept': 'application/json', 'X-API-Key': apiKey };
     
     const assetPromises = wallets.map(async (wallet) => {
         const chain = MORALIS_CHAIN_MAP[wallet.blockchain];
+        console.log('[Moralis Debug] Wallet:', wallet.address.slice(0, 10), 'Chain:', wallet.blockchain, '→', chain);
         if (!chain) return { tokens: [], nfts: [], transactions: [], defiPositions: [] };
         
         const walletTokens: Partial<Token>[] = [];
@@ -438,6 +442,11 @@ async function fetchBitcoinAssets(wallets: Wallet[]): Promise<{ tokens: Partial<
 
 export async function fetchPortfolioAssets(wallets: Wallet[]): Promise<{ tokens: Token[], nfts: NFT[], transactions: Transaction[], defiPositions: DeFiPosition[] }> {
     if (wallets.length === 0) return { tokens: [], nfts: [], transactions: [], defiPositions: [] };
+
+    // Debug logging
+    console.log('[API Debug] Moralis API Key exists:', !!MORALIS_API_KEY);
+    console.log('[API Debug] Moralis API Key length:', MORALIS_API_KEY?.length || 0);
+    console.log('[API Debug] Wallets:', wallets.map(w => ({ blockchain: w.blockchain, address: w.address.slice(0, 10) + '...' })));
 
     const assetPromises = [
         wallets.some(w => MORALIS_CHAIN_MAP[w.blockchain] && MORALIS_API_KEY) 
