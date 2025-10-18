@@ -26,36 +26,30 @@ serve(async (req: Request) => {
       });
     }
 
+    if (!prompt || typeof prompt !== 'string') {
+      return new Response(JSON.stringify({ error: 'Invalid prompt' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400,
+      });
+    }
+
     const ai = new GoogleGenerativeAI(apiKey);
+    const model = ai.getGenerativeModel({ model: 'gemini-1.5-flash' });
     
-    const modelConfig: any = { model: 'gemini-1.5-flash' };
-    
-    if (schema) {
-        modelConfig.generationConfig = {
-            responseMimeType: 'application/json',
-            responseSchema: schema
-        };
-    }
-
-    const model = ai.getGenerativeModel(modelConfig);
     const result = await model.generateContent(prompt);
-    const response = await result.response;
-    
-    let responseData;
+    const response = result.response;
+    const text = response.text();
 
-    if (schema) {
-        const resultText = response.text().trim();
-        responseData = JSON.parse(resultText);
-    } else {
-        responseData = { reply: response.text() };
-    }
-
-    return new Response(JSON.stringify(responseData), {
+    return new Response(JSON.stringify({ reply: text }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     });
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error('Edge Function Error:', error);
+    return new Response(JSON.stringify({ 
+      error: error.message || 'Unknown error',
+      stack: error.stack || 'No stack trace'
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
     });
