@@ -251,19 +251,20 @@ async function fetchEvmAssets(wallets: Wallet[], apiKey: string): Promise<{ toke
                     console.log('[Ankr] Assets found:', assets.length);
                     
                     for (const asset of assets) {
-                        console.log('[Ankr] Asset:', {
-                            symbol: asset.tokenSymbol,
-                            balance: asset.balance,
-                            balanceRawInteger: asset.balanceRawInteger,
-                            balanceUsd: asset.balanceUsd
-                        });
                         const amount = parseFloat(asset.balance) || 0;
-                        if (amount > 0) {
+                        const usdValue = parseFloat(asset.balanceUsd) || 0;
+                        
+                        if (amount > 0 && usdValue > 0.01) { // Filter out dust
+                            const price = usdValue / amount; // Calculate price from Ankr's USD value
+                            
                             walletTokens.push({
                                 id: `${wallet.id}-${asset.tokenSymbol}`,
                                 symbol: asset.tokenSymbol,
                                 name: asset.tokenName,
                                 amount: amount,
+                                price: price,
+                                value: usdValue,
+                                change24h: 0, // Ankr doesn't provide 24h change, will fetch separately
                                 chain: wallet.blockchain,
                                 logoUrl: asset.thumbnail || `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/${wallet.blockchain}/info/logo.png`
                             });
