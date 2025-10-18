@@ -46,7 +46,7 @@ export const WhalePortfolio: React.FC<WhalePortfolioProps> = ({ whale, onBack, u
 
     const metadata = BLOCKCHAIN_METADATA[whale.blockchain] || { icon: (() => null), name: 'Unknown', color: 'gray' };
     const Icon = metadata.icon;
-    const isPositive = whale.change24h >= 0;
+    const isPositive = (whale.change24h ?? 0) >= 0;
 
     return (
         <div className="space-y-6 animate-fade-in">
@@ -69,10 +69,10 @@ export const WhalePortfolio: React.FC<WhalePortfolioProps> = ({ whale, onBack, u
                             </div>
                         </div>
                         <div className="mt-4 sm:mt-0 text-left sm:text-right">
-                             <p className="text-2xl font-bold text-neutral-900 dark:text-white">{formatCurrency(whale.totalValue)}</p>
+                             <p className="text-2xl font-bold text-neutral-900 dark:text-white">{formatCurrency(whale.totalValue ?? 0)}</p>
                             <div className={`flex items-center justify-start sm:justify-end text-sm font-medium mt-1 ${isPositive ? 'text-success' : 'text-error'}`}>
                                 {isPositive ? <ArrowUpRightIcon className="w-4 h-4 mr-1" /> : <ArrowDownRightIcon className="w-4 h-4 mr-1" />}
-                                <span>{whale.change24h.toFixed(2)}% in 24h</span>
+                                <span>{(whale.change24h ?? 0).toFixed(2)}% in 24h</span>
                             </div>
                         </div>
                     </div>
