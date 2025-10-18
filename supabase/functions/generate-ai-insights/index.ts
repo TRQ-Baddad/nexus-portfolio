@@ -34,7 +34,17 @@ serve(async (req: Request) => {
     }
 
     const ai = new GoogleGenerativeAI(apiKey);
-    const model = ai.getGenerativeModel({ model: 'gemini-pro' });
+    
+    // List available models for debugging
+    try {
+      const models = await ai.listModels();
+      console.log('Available models:', models.map((m: any) => m.name));
+    } catch (e) {
+      console.log('Could not list models:', e);
+    }
+    
+    // Try models/gemini-1.5-flash-latest
+    const model = ai.getGenerativeModel({ model: 'models/gemini-1.5-flash-latest' });
     
     const result = await model.generateContent(prompt);
     const response = result.response;
