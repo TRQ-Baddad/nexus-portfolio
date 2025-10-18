@@ -293,7 +293,7 @@ async function fetchEvmAssets(wallets: Wallet[], apiKey: string): Promise<{ toke
 
             // Fetch DeFi Positions
             try {
-                const defiPositionsRes = await fetch(`https://deep-index.moralis.io/api/v2/${wallet.address}/defi?chain=${chain}`, { headers });
+                const defiPositionsRes = await fetch(`https://deep-index.moralis.io/api/v2.2/${wallet.address}/defi?chain=${chain}`, { headers });
                 if (defiPositionsRes.ok) {
                     const defiData = await defiPositionsRes.json();
                     walletDefiPositions.push(...(defiData.protocol_positions || []).map((p: any) => normalizeDeFiPosition(p, wallet.blockchain)).filter(Boolean) as DeFiPosition[]);
