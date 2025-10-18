@@ -246,9 +246,17 @@ async function fetchEvmAssets(wallets: Wallet[], apiKey: string): Promise<{ toke
                 
                 if (balanceResponse.ok) {
                     const data = await balanceResponse.json();
+                    console.log('[Ankr] Raw response:', data);
                     const assets = data.result?.assets || [];
+                    console.log('[Ankr] Assets found:', assets.length);
                     
                     for (const asset of assets) {
+                        console.log('[Ankr] Asset:', {
+                            symbol: asset.tokenSymbol,
+                            balance: asset.balance,
+                            balanceRawInteger: asset.balanceRawInteger,
+                            balanceUsd: asset.balanceUsd
+                        });
                         const amount = parseFloat(asset.balance) || 0;
                         if (amount > 0) {
                             walletTokens.push({
