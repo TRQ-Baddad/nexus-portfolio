@@ -25,12 +25,13 @@ const TransactionRow: React.FC<{ tx: AdminTransaction, significanceThreshold: nu
     const ChainIcon = BLOCKCHAIN_METADATA[chain]?.icon || (() => null);
     const isSignificant = valueUsd >= significanceThreshold;
     
-    const typeMeta: Record<TransactionType, { icon: React.FC<any>, color: string, label: string }> = {
+    const typeMeta: Record<string, { icon: React.FC<any>, color: string, label: string }> = {
         send: { icon: ArrowUpRightIcon, color: 'text-error', label: 'Send' },
         receive: { icon: ArrowDownLeftIcon, color: 'text-success', label: 'Receive' },
         swap: { icon: RepeatIcon, color: 'text-blue-400', label: 'Swap' },
     };
-    const TypeIcon = typeMeta[type].icon;
+    const typeData = typeMeta[type] || { icon: () => null, color: 'text-gray-500', label: 'Unknown' };
+    const TypeIcon = typeData.icon;
 
     return (
         <tr className={`border-b border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50/50 dark:hover:bg-neutral-800/50 transition-colors text-sm ${isSignificant ? 'bg-amber-500/10' : ''}`}>
@@ -45,7 +46,7 @@ const TransactionRow: React.FC<{ tx: AdminTransaction, significanceThreshold: nu
             </td>
             <td className="p-4">
                 <div className="flex items-center space-x-2">
-                    <TypeIcon className={`w-4 h-4 ${typeMeta[type].color}`} />
+                    <TypeIcon className={`w-4 h-4 ${typeData.color}`} />
                     <span className="font-semibold capitalize">{type}</span>
                 </div>
             </td>
@@ -53,12 +54,14 @@ const TransactionRow: React.FC<{ tx: AdminTransaction, significanceThreshold: nu
                 <p className="font-semibold">{amount.toLocaleString(undefined, { maximumFractionDigits: 4 })} {tokenSymbol}</p>
                 <p className="text-xs text-neutral-500 dark:text-neutral-400">${valueUsd.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
             </td>
-            <td className="p-4"><ChainIcon className="w-5 h-5"><title>{BLOCKCHAIN_METADATA[chain].name}</title></ChainIcon></td>
+            <td className="p-4"><ChainIcon className="w-5 h-5"><title>{BLOCKCHAIN_METADATA[chain]?.name || 'Unknown'}</title></ChainIcon></td>
             <td className="p-4 hidden md:table-cell text-neutral-500 dark:text-neutral-400">{new Date(date).toLocaleString()}</td>
             <td className="p-4 text-center">
-                <a href={BLOCKCHAIN_METADATA[chain].explorer.txUrl(hash)} target="_blank" rel="noopener noreferrer" className="inline-block p-2 text-neutral-500 hover:text-brand-blue rounded-full hover:bg-brand-blue/10">
-                    <ExternalLinkIcon className="w-4 h-4" />
-                </a>
+                {BLOCKCHAIN_METADATA[chain]?.explorer ? (
+                    <a href={BLOCKCHAIN_METADATA[chain].explorer.txUrl(hash)} target="_blank" rel="noopener noreferrer" className="inline-block p-2 text-neutral-500 hover:text-brand-blue rounded-full hover:bg-brand-blue/10">
+                        <ExternalLinkIcon className="w-4 h-4" />
+                    </a>
+                ) : <span className="text-neutral-400">-</span>}
             </td>
         </tr>
     );
