@@ -28,13 +28,16 @@ serve(async (req: Request) => {
 
     const ai = new GoogleGenerativeAI(apiKey);
     
-    const config: any = {};
+    const modelConfig: any = { model: 'gemini-1.5-flash' };
+    
     if (schema) {
-        config.responseMimeType = 'application/json';
-        config.responseSchema = schema;
+        modelConfig.generationConfig = {
+            responseMimeType: 'application/json',
+            responseSchema: schema
+        };
     }
 
-    const model = ai.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = ai.getGenerativeModel(modelConfig);
     const result = await model.generateContent(prompt);
     const response = await result.response;
     
