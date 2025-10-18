@@ -16,7 +16,7 @@ interface NftGalleryProps {
 }
 
 const NftCard: React.FC<{ nft: NFT; onClick: () => void }> = ({ nft, onClick }) => {
-    const ChainIcon = BLOCKCHAIN_METADATA[nft.chain].icon;
+    const ChainIcon = BLOCKCHAIN_METADATA[nft.chain]?.icon || (() => null);
     const floorPriceSymbol = nft.chain === 'solana' ? 'SOL' : 'ETH';
 
     return (

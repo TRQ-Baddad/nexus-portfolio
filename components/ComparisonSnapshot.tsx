@@ -120,7 +120,7 @@ export const ComparisonSnapshot: React.FC<ComparisonSnapshotProps> = ({ user, wh
                      <div className="col-span-2">
                          <PortfolioColumn 
                             title={whale.name}
-                            chainIcon={BLOCKCHAIN_METADATA[whale.blockchain].icon}
+                            chainIcon={BLOCKCHAIN_METADATA[whale.blockchain]?.icon || (() => null)}
                             totalValue={whale.totalValue}
                             changePercent={whale.change24h}
                         />

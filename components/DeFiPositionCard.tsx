@@ -13,7 +13,7 @@ const positionTypeMap: Record<DeFiPosition['type'], string> = {
 };
 
 export const DeFiPositionCard: React.FC<{ position: DeFiPosition }> = ({ position }) => {
-    const ChainIcon = BLOCKCHAIN_METADATA[position.chain].icon;
+    const ChainIcon = BLOCKCHAIN_METADATA[position.chain]?.icon || (() => null);
     const { formatCurrency } = useUserPreferences();
 
     return (

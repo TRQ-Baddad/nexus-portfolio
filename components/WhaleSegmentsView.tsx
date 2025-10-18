@@ -34,7 +34,7 @@ const SegmentCard: React.FC<{ segment: WhaleSegment, onView: () => void; allWhal
                 <Card.Content className="p-6 pt-0">
                     <div className="flex -space-x-3 overflow-hidden">
                         {segment.addresses.slice(0, 5).map((addrInfo, index) => {
-                            const ChainIcon = BLOCKCHAIN_METADATA[addrInfo.blockchain].icon;
+                            const ChainIcon = BLOCKCHAIN_METADATA[addrInfo.blockchain]?.icon || (() => null);
                             return (
                                 <div key={index} className="relative inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-neutral-800" title={`${addrInfo.address} on ${addrInfo.blockchain}`}>
                                     <ChainIcon className="w-full h-full" />

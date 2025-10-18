@@ -58,7 +58,7 @@ const HoldingsTable: React.FC<{ tokens: Token[], loading: boolean }> = ({ tokens
 
     const TokenRow: React.FC<{ token: Token }> = ({ token }) => {
         const isPositive = token.change24h >= 0;
-        const ChainIcon = BLOCKCHAIN_METADATA[token.chain].icon;
+        const ChainIcon = BLOCKCHAIN_METADATA[token.chain]?.icon || (() => null);
 
         return (
             <tr className="border-b border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50/50 dark:hover:bg-neutral-800/50 transition-colors">

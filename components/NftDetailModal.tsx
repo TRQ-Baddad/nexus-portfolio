@@ -13,7 +13,7 @@ interface NftDetailModalProps {
 export const NftDetailModal: React.FC<NftDetailModalProps> = ({ nft, onClose }) => {
   if (!nft) return null;
 
-  const ChainIcon = BLOCKCHAIN_METADATA[nft.chain].icon;
+  const ChainIcon = BLOCKCHAIN_METADATA[nft.chain]?.icon || (() => null);
   const floorPriceSymbol = nft.chain === 'solana' ? 'SOL' : 'ETH';
 
   return (

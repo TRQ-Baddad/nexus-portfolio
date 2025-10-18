@@ -13,7 +13,7 @@ export const PortfolioMovementCard: React.FC<PortfolioMovementCardProps> = ({ to
     const Icon = isPositive ? TrendingUpIcon : TrendingDownIcon;
     const colorClass = isPositive ? 'text-success' : 'text-error';
     const valueChange = (token.value / (1 + token.change24h / 100)) * (token.change24h / 100);
-    const ChainIcon = BLOCKCHAIN_METADATA[token.chain].icon;
+    const ChainIcon = BLOCKCHAIN_METADATA[token.chain]?.icon || (() => null);
 
     return (
         <div className="flex items-start space-x-4">

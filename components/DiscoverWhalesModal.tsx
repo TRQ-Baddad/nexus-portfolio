@@ -79,7 +79,7 @@ const SuggestedWhaleCard: React.FC<{
     onAdd: (whaleData: { address: string; blockchain: Blockchain; name: string; }) => void;
     isAdded: boolean;
 }> = ({ whale, onAdd, isAdded }) => {
-    const ChainIcon = BLOCKCHAIN_METADATA[whale.blockchain].icon;
+    const ChainIcon = BLOCKCHAIN_METADATA[whale.blockchain]?.icon || (() => null);
     
     const handleAdd = () => {
         onAdd({

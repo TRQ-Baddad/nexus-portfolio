@@ -35,7 +35,7 @@ const TypeFilterButton: React.FC<{ label: string, isActive: boolean, onClick: ()
 
 const TransactionRow: React.FC<{ transaction: Transaction; onClick: () => void; }> = ({ transaction, onClick }) => {
     const { type, date, tokenSymbol, amount, valueUsd, fromAddress, toAddress, chain } = transaction;
-    const ChainIcon = BLOCKCHAIN_METADATA[chain].icon;
+    const ChainIcon = BLOCKCHAIN_METADATA[chain]?.icon || (() => null);
     const { formatCurrency } = useUserPreferences();
     
     const typeMeta: Record<TransactionType, { icon: React.FC<any>, color: string, label: string }> = {

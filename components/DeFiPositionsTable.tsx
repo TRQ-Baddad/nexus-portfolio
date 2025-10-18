@@ -51,7 +51,7 @@ const SortableHeader: React.FC<{
 };
 
 const PositionRow: React.FC<{ position: DeFiPosition; isExpanded: boolean; onToggleExpand: () => void; }> = ({ position, isExpanded, onToggleExpand }) => {
-    const ChainIcon = BLOCKCHAIN_METADATA[position.chain].icon;
+    const ChainIcon = BLOCKCHAIN_METADATA[position.chain]?.icon || (() => null);
     const { formatCurrency } = useUserPreferences();
     return (
         <tr className="border-b border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50/50 dark:hover:bg-neutral-800/50 transition-colors">
