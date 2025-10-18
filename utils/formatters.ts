@@ -5,7 +5,9 @@ import { TRANSLATIONS } from '../constants';
 export function formatRelativeTime(date: Date | null): string {
     if (!date) return '';
     const now = new Date();
-    const seconds = Math.round((now.getTime() - date.getTime()) / 1000);
+    const dateObj = date instanceof Date ? date : new Date(date);
+    if (isNaN(dateObj.getTime())) return 'Recently';
+    const seconds = Math.round((now.getTime() - dateObj.getTime()) / 1000);
 
     if (seconds < 5) return 'just now';
     if (seconds < 60) return `${seconds} seconds ago`;
