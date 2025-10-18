@@ -1,10 +1,8 @@
 // supabase/functions/generate-ai-insights/index.ts
 
 // Reference the Supabase edge function types for Deno runtime.
-// FIX: Switched to the official, recommended esm.sh CDN for Supabase function types to resolve type definition errors.
 /// <reference types="https://esm.sh/@supabase/functions-js@2" />
 import { serve } from 'https://deno.land/std@0.224.0/http/server.ts';
-import { GoogleGenerativeAI } from 'npm:@google/generative-ai@0.21.0';
 import { corsHeaders } from '../_shared/cors.ts';
 
 // Provide a Deno global type for local development environments.
@@ -33,22 +31,26 @@ serve(async (req: Request) => {
       });
     }
 
-    const ai = new GoogleGenerativeAI(apiKey);
+    // Use REST API directly - try gemini-1.5-flash
+    const apiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
     
-    // List available models for debugging
-    try {
-      const models = await ai.listModels();
-      console.log('Available models:', models.map((m: any) => m.name));
-    } catch (e) {
-      console.log('Could not list models:', e);
+    const geminiResponse = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{ text: prompt }]
+        }]
+      })
+    });
+
+    if (!geminiResponse.ok) {
+      const errorText = await geminiResponse.text();
+      throw new Error(`Gemini API error (${geminiResponse.status}): ${errorText}`);
     }
-    
-    // Try models/gemini-1.5-flash-latest
-    const model = ai.getGenerativeModel({ model: 'models/gemini-1.5-flash-latest' });
-    
-    const result = await model.generateContent(prompt);
-    const response = result.response;
-    const text = response.text();
+
+    const data = await geminiResponse.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response';
 
     return new Response(JSON.stringify({ reply: text }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
