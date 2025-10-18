@@ -28,6 +28,7 @@ const ToggleSwitch: React.FC<{ enabled: boolean; onChange: () => void; }> = ({ e
 
 const WhaleRow: React.FC<{ whale: WhaleWallet; onEdit: () => void; onDelete: () => void; onToggleFeatured: () => void; onRefresh: () => void; isRefreshing: boolean; }> = ({ whale, onEdit, onDelete, onToggleFeatured, onRefresh, isRefreshing }) => {
     const change24h = whale.change24h ?? 0;
+    const totalValue = whale.totalValue ?? 0;
     const isPositive = change24h >= 0;
     const ChainIcon = BLOCKCHAIN_METADATA[whale.blockchain]?.icon || (() => null);
 
@@ -43,7 +44,7 @@ const WhaleRow: React.FC<{ whale: WhaleWallet; onEdit: () => void; onDelete: () 
                 </div>
             </td>
             <td className="p-4 hidden md:table-cell">
-                <p className="font-medium text-neutral-900 dark:text-white">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(whale.totalValue)}</p>
+                <p className="font-medium text-neutral-900 dark:text-white">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(totalValue)}</p>
             </td>
             <td className={`p-4 font-medium hidden lg:table-cell ${isPositive ? 'text-success' : 'text-error'}`}>
                 {isPositive ? '+' : ''}{change24h.toFixed(2)}%
@@ -86,7 +87,17 @@ export const WhaleManagementView: React.FC = () => {
     const fetchWhales = useCallback(async () => {
         setLoading(true);
         const { data, error } = await supabase.from('whales').select('*').order('created_at', { ascending: false });
-        if (data) setWhales(data as WhaleWallet[]);
+        if (data) {
+            // Map database columns (snake_case) to TypeScript interface (camelCase)
+            const mappedWhales = data.map(whale => ({
+                ...whale,
+                isFeatured: whale.is_featured,
+                isCustom: whale.is_custom,
+                totalValue: whale.total_value,
+                change24h: whale.change_24h
+            }));
+            setWhales(mappedWhales as WhaleWallet[]);
+        }
         if (error) console.error("Error fetching whales:", error);
         setLoading(false);
     }, []);
