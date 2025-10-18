@@ -23,9 +23,9 @@ type Status = 'Operational' | 'Degraded' | 'Outage' | 'Checking...';
 
 interface SystemEvent {
     id: string;
-    created_at: string;
+    timestamp: string;
     service: string;
-    level: 'INFO' | 'WARN' | 'ERROR';
+    severity: 'info' | 'warning' | 'error' | 'critical';
     message: string;
 }
 
@@ -81,12 +81,13 @@ const LOGS_PER_PAGE = 20;
 
 const LogLevelBadge: React.FC<{ level: string }> = ({ level }) => {
     const styles = {
-        INFO: 'bg-blue-500/20 text-blue-500',
-        WARN: 'bg-warning/20 text-warning',
-        ERROR: 'bg-error/20 text-error',
+        info: 'bg-blue-500/20 text-blue-500',
+        warning: 'bg-warning/20 text-warning',
+        error: 'bg-error/20 text-error',
+        critical: 'bg-red-600/20 text-red-600',
     };
     return (
-        <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${styles[level as keyof typeof styles] || 'bg-neutral-500/20'}`}>
+        <span className={`text-xs font-bold px-2 py-0.5 rounded-full uppercase ${styles[level as keyof typeof styles] || 'bg-neutral-500/20'}`}>
             {level}
         </span>
     );
@@ -209,7 +210,7 @@ export const SystemHealthView: React.FC = () => {
             query = query.or(`service.ilike.%${logSearch}%,message.ilike.%${logSearch}%`);
         }
 
-        const { data, error, count } = await query.order('created_at', { ascending: false }).range(from, to);
+        const { data, error, count } = await query.order('timestamp', { ascending: false }).range(from, to);
         
         if (data) setLogs(data);
         if (count) setLogCount(count);
@@ -376,9 +377,9 @@ export const SystemHealthView: React.FC = () => {
                                 ) : logs.length > 0 ? (
                                     logs.map((log) => (
                                         <tr key={log.id} className="border-b border-neutral-200 dark:border-neutral-800 last:border-b-0">
-                                            <td className="p-4 font-mono text-xs text-neutral-500 dark:text-neutral-400 whitespace-nowrap">{new Date(log.created_at).toLocaleString()}</td>
+                                            <td className="p-4 font-mono text-xs text-neutral-500 dark:text-neutral-400 whitespace-nowrap">{new Date(log.timestamp).toLocaleString()}</td>
                                             <td className="p-4 font-semibold">{log.service}</td>
-                                            <td className="p-4"><LogLevelBadge level={log.level} /></td>
+                                            <td className="p-4"><LogLevelBadge level={log.severity} /></td>
                                             <td className="p-4 font-mono text-xs">{log.message}</td>
                                         </tr>
                                     ))
