@@ -3,10 +3,10 @@ import { BLOCKCHAIN_METADATA } from '../constants';
 
 // --- CONSTANTS & CONFIG ---
 
-const MORALIS_API_KEY = import.meta.env.VITE_MORALIS_API_KEY;
+const ANKR_API_KEY = import.meta.env.VITE_ANKR_API_KEY;
 const HELIUS_API_KEY = import.meta.env.VITE_HELIUS_API_KEY;
 
-const MORALIS_CHAIN_MAP: Record<string, string> = {
+const ANKR_CHAIN_MAP: Record<string, string> = {
     ethereum: 'eth',
     polygon: 'polygon',
     arbitrum: 'arbitrum',
@@ -212,14 +212,14 @@ function normalizeBitcoinTx(tx: any, wallet: Wallet): Partial<Transaction> | nul
 // --- CHAIN-SPECIFIC DATA FETCHERS ---
 
 async function fetchEvmAssets(wallets: Wallet[], apiKey: string): Promise<{ tokens: Partial<Token>[], nfts: NFT[], transactions: Partial<Transaction>[], defiPositions: DeFiPosition[] }> {
-    console.log('[Moralis Debug] API Key received:', apiKey ? `${apiKey.slice(0, 10)}...` : 'MISSING');
-    console.log('[Moralis Debug] Wallets to fetch:', wallets.length);
+    console.log('[Ankr Debug] API Key received:', apiKey ? `${apiKey.slice(0, 10)}...` : 'MISSING');
+    console.log('[Ankr Debug] Wallets to fetch:', wallets.length);
     
-    const headers = { 'accept': 'application/json', 'X-API-Key': apiKey };
+    const baseUrl = `https://rpc.ankr.com/multichain/${apiKey}`;
     
     const assetPromises = wallets.map(async (wallet) => {
-        const chain = MORALIS_CHAIN_MAP[wallet.blockchain];
-        console.log('[Moralis Debug] Wallet:', wallet.address.slice(0, 10), 'Chain:', wallet.blockchain, '→', chain);
+        const chain = ANKR_CHAIN_MAP[wallet.blockchain];
+        console.log('[Ankr Debug] Wallet:', wallet.address.slice(0, 10), 'Chain:', wallet.blockchain, '→', chain);
         if (!chain) return { tokens: [], nfts: [], transactions: [], defiPositions: [] };
         
         const walletTokens: Partial<Token>[] = [];
@@ -228,81 +228,83 @@ async function fetchEvmAssets(wallets: Wallet[], apiKey: string): Promise<{ toke
         const walletDefiPositions: DeFiPosition[] = [];
 
         try {
-            // Fetch native and ERC20 balances
+            // Fetch native and ERC20 balances using Ankr
             try {
-                const [balanceRes, erc20BalancesRes] = await Promise.all([
-                    fetch(`https://deep-index.moralis.io/api/v2.2/${wallet.address}/balance?chain=${chain}`, { headers }),
-                    fetch(`https://deep-index.moralis.io/api/v2.2/${wallet.address}/erc20?chain=${chain}`, { headers }),
-                ]);
-                if (balanceRes.ok) {
-                    const data = await balanceRes.json();
-                    const nativeMeta = NATIVE_TOKEN_METADATA[wallet.blockchain];
-                    if (nativeMeta) {
-                        walletTokens.push({
-                            id: `${wallet.id}-native`, symbol: nativeMeta.symbol, name: nativeMeta.name,
-                            amount: parseInt(data.balance, 10) / (10 ** nativeMeta.decimals),
-                            chain: wallet.blockchain, logoUrl: `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/${wallet.blockchain}/info/logo.png`,
-                        });
+                const balanceResponse = await fetch(baseUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        jsonrpc: '2.0',
+                        method: 'ankr_getAccountBalance',
+                        params: {
+                            blockchain: chain,
+                            walletAddress: wallet.address
+                        },
+                        id: 1
+                    })
+                });
+                
+                if (balanceResponse.ok) {
+                    const data = await balanceResponse.json();
+                    const assets = data.result?.assets || [];
+                    
+                    for (const asset of assets) {
+                        const amount = parseFloat(asset.balance) || 0;
+                        if (amount > 0) {
+                            walletTokens.push({
+                                id: `${wallet.id}-${asset.tokenSymbol}`,
+                                symbol: asset.tokenSymbol,
+                                name: asset.tokenName,
+                                amount: amount,
+                                chain: wallet.blockchain,
+                                logoUrl: asset.thumbnail || `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/${wallet.blockchain}/info/logo.png`
+                            });
+                        }
                     }
-                }
-                if (erc20BalancesRes.ok) {
-                    const erc20Data = await erc20BalancesRes.json();
-                    walletTokens.push(...(erc20Data || []).filter((t: any) => !t.possible_spam).map((t: any) => ({
-                        id: `${wallet.id}-${t.symbol}`, symbol: t.symbol, name: t.name,
-                        amount: parseInt(t.balance, 10) / (10 ** t.decimals),
-                        chain: wallet.blockchain, logoUrl: resolveIpfsUrl(t.logo)
-                    })));
                 }
             } catch (e) { console.error(`Failed to fetch balances for ${wallet.address}:`, e); }
 
-            // Fetch NFTs
+            // Fetch NFTs using Ankr
             try {
-                const nftsRes = await fetch(`https://deep-index.moralis.io/api/v2.2/${wallet.address}/nft?chain=${chain}&limit=50`, { headers });
-                if (nftsRes.ok) {
-                    const nftsData = await nftsRes.json();
-                    for (const nft of nftsData.result || []) {
-                        if (nft.normalized_metadata && nft.normalized_metadata.image) {
+                const nftResponse = await fetch(baseUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        jsonrpc: '2.0',
+                        method: 'ankr_getNFTsByOwner',
+                        params: {
+                            blockchain: chain,
+                            walletAddress: wallet.address,
+                            pageSize: 50
+                        },
+                        id: 1
+                    })
+                });
+                
+                if (nftResponse.ok) {
+                    const data = await nftResponse.json();
+                    const nfts = data.result?.assets || [];
+                    
+                    for (const nft of nfts) {
+                        if (nft.imageUrl) {
                             walletNfts.push({
-                               id: `${wallet.id}-${nft.token_address}-${nft.token_id}`,
-                               name: nft.normalized_metadata.name || nft.name || `#${nft.token_id}`, collection: nft.name || 'Unknown Collection',
-                               imageUrl: resolveIpfsUrl(nft.normalized_metadata.image), floorPrice: null, chain: wallet.blockchain,
-                               marketplaceUrl: `https://opensea.io/assets/${chain}/${nft.token_address}/${nft.token_id}`
+                                id: `${wallet.id}-${nft.contractAddress}-${nft.tokenId}`,
+                                name: nft.name || `#${nft.tokenId}`,
+                                collection: nft.collectionName || 'Unknown Collection',
+                                imageUrl: resolveIpfsUrl(nft.imageUrl),
+                                floorPrice: null,
+                                chain: wallet.blockchain,
+                                marketplaceUrl: `https://opensea.io/assets/${chain}/${nft.contractAddress}/${nft.tokenId}`
                             });
                         }
                     }
                 }
             } catch (e) { console.error(`Failed to fetch NFTs for ${wallet.address}:`, e); }
 
-            // Fetch Transactions
-            try {
-                const [erc20TxsRes, nativeTxsRes] = await Promise.all([
-                    fetch(`https://deep-index.moralis.io/api/v2.2/${wallet.address}/erc20/transfers?chain=${chain}&limit=50`, { headers }),
-                    fetch(`https://deep-index.moralis.io/api/v2.2/${wallet.address}/native/transfers?chain=${chain}&limit=50`, { headers }),
-                ]);
-                if (erc20TxsRes.ok) {
-                    const { result } = await erc20TxsRes.json();
-                    for(const tx of result) {
-                        const normalized = normalizeEvmTx(tx, wallet, false);
-                        if (normalized) walletTransactions.push(normalized);
-                    }
-                }
-                if (nativeTxsRes.ok) {
-                    const { result } = await nativeTxsRes.json();
-                    for(const tx of result) {
-                        const normalized = normalizeEvmTx(tx, wallet, true);
-                        if (normalized) walletTransactions.push(normalized);
-                    }
-                }
-            } catch (e) { console.error(`Failed to fetch transactions for ${wallet.address}:`, e); }
-
-            // Fetch DeFi Positions
-            try {
-                const defiPositionsRes = await fetch(`https://deep-index.moralis.io/api/v2.2/${wallet.address}/defi?chain=${chain}`, { headers });
-                if (defiPositionsRes.ok) {
-                    const defiData = await defiPositionsRes.json();
-                    walletDefiPositions.push(...(defiData.protocol_positions || []).map((p: any) => normalizeDeFiPosition(p, wallet.blockchain)).filter(Boolean) as DeFiPosition[]);
-                }
-            } catch (e) { console.error(`Failed to fetch DeFi positions for ${wallet.address}:`, e); }
+            // Transactions and DeFi - Currently using basic data
+            // Ankr Advanced API has limited transaction history support
+            // Consider adding Etherscan API for detailed transaction data later
+            console.log(`[Ankr] Skipping transactions and DeFi for ${wallet.address} - feature coming soon`);
             
             return { tokens: walletTokens, nfts: walletNfts, transactions: walletTransactions, defiPositions: walletDefiPositions };
 
@@ -444,13 +446,13 @@ export async function fetchPortfolioAssets(wallets: Wallet[]): Promise<{ tokens:
     if (wallets.length === 0) return { tokens: [], nfts: [], transactions: [], defiPositions: [] };
 
     // Debug logging
-    console.log('[API Debug] Moralis API Key exists:', !!MORALIS_API_KEY);
-    console.log('[API Debug] Moralis API Key length:', MORALIS_API_KEY?.length || 0);
+    console.log('[API Debug] Ankr API Key exists:', !!ANKR_API_KEY);
+    console.log('[API Debug] Ankr API Key length:', ANKR_API_KEY?.length || 0);
     console.log('[API Debug] Wallets:', wallets.map(w => ({ blockchain: w.blockchain, address: w.address.slice(0, 10) + '...' })));
 
     const assetPromises = [
-        wallets.some(w => MORALIS_CHAIN_MAP[w.blockchain] && MORALIS_API_KEY) 
-            ? fetchEvmAssets(wallets.filter(w => MORALIS_CHAIN_MAP[w.blockchain]), MORALIS_API_KEY!)
+        wallets.some(w => ANKR_CHAIN_MAP[w.blockchain] && ANKR_API_KEY) 
+            ? fetchEvmAssets(wallets.filter(w => ANKR_CHAIN_MAP[w.blockchain]), ANKR_API_KEY!)
             : Promise.resolve({ tokens: [], nfts: [], transactions: [], defiPositions: [] }),
         wallets.some(w => w.blockchain === 'solana' && HELIUS_API_KEY)
             ? fetchSolanaAssets(wallets.filter(w => w.blockchain === 'solana'), HELIUS_API_KEY!)
