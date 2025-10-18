@@ -19,7 +19,6 @@ const ToggleSwitch: React.FC<{ enabled: boolean; onChange: () => void; }> = ({ e
         type="button"
         onClick={(e) => {
             e.stopPropagation();
-            console.log('Toggle clicked, current state:', enabled);
             onChange();
         }}
         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-brand-blue focus:ring-offset-2 ${enabled ? 'bg-brand-blue' : 'bg-neutral-300 dark:bg-neutral-600'}`}
@@ -195,9 +194,7 @@ export const WhaleManagementView: React.FC = () => {
     };
     
     const handleToggleFeatured = async (whale: WhaleWallet) => {
-        console.log('handleToggleFeatured called for whale:', whale.name, 'Current featured status:', whale.isFeatured);
         const updatedStatus = !(whale.isFeatured ?? false);
-        console.log('New featured status will be:', updatedStatus);
         
         // Optimistic UI update - update local state immediately
         setWhales(prev => prev.map(w => 
@@ -214,7 +211,6 @@ export const WhaleManagementView: React.FC = () => {
             ));
             alert('Failed to update featured status. Please try again.');
         } else {
-            console.log('Featured status updated successfully in database');
             await logAdminAction('toggle_whale_featured', null, { whaleId: whale.id, name: whale.name, featured: updatedStatus });
         }
     };
