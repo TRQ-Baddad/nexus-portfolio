@@ -16,8 +16,13 @@ import { fetchPortfolioAssets } from '../../../../utils/api';
 
 const ToggleSwitch: React.FC<{ enabled: boolean; onChange: () => void; }> = ({ enabled, onChange }) => (
     <button
-        onClick={onChange}
-        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${enabled ? 'bg-brand-blue' : 'bg-neutral-300 dark:bg-neutral-600'}`}
+        type="button"
+        onClick={(e) => {
+            e.stopPropagation();
+            console.log('Toggle clicked, current state:', enabled);
+            onChange();
+        }}
+        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-brand-blue focus:ring-offset-2 ${enabled ? 'bg-brand-blue' : 'bg-neutral-300 dark:bg-neutral-600'}`}
     >
         <span
             className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${enabled ? 'translate-x-6' : 'translate-x-1'}`}
@@ -190,13 +195,27 @@ export const WhaleManagementView: React.FC = () => {
     };
     
     const handleToggleFeatured = async (whale: WhaleWallet) => {
+        console.log('handleToggleFeatured called for whale:', whale.name, 'Current featured status:', whale.isFeatured);
         const updatedStatus = !(whale.isFeatured ?? false);
+        console.log('New featured status will be:', updatedStatus);
+        
+        // Optimistic UI update - update local state immediately
+        setWhales(prev => prev.map(w => 
+            w.id === whale.id ? { ...w, isFeatured: updatedStatus } : w
+        ));
+        
+        // Then update database
         const { error } = await supabase.from('whales').update({ is_featured: updatedStatus }).eq('id', whale.id);
         if (error) {
             console.error("Error updating featured status:", error);
+            // Revert optimistic update on error
+            setWhales(prev => prev.map(w => 
+                w.id === whale.id ? { ...w, isFeatured: !updatedStatus } : w
+            ));
+            alert('Failed to update featured status. Please try again.');
         } else {
+            console.log('Featured status updated successfully in database');
             await logAdminAction('toggle_whale_featured', null, { whaleId: whale.id, name: whale.name, featured: updatedStatus });
-            fetchWhales(); // Re-fetch to ensure consistency
         }
     };
 
