@@ -6,7 +6,6 @@ import AdminApp from './apps/admin-dashboard/src/App';
 import { ThemeProvider } from './hooks/useTheme';
 import { TranslationProvider } from './utils/formatters';
 import { UserPreferencesProvider } from './hooks/useUserPreferences';
-import { AppProvider } from './apps/nexus-portfolio/src/context/AppContext';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -34,13 +33,11 @@ if (path.startsWith('/admin')) {
     // Portfolio App with preferences as the top-level provider
     AppToRender = (
         <UserPreferencesProvider>
-            <AppProvider>
-                <ThemeProvider>
-                    <TranslationProvider>
-                        <PortfolioApp />
-                    </TranslationProvider>
-                </ThemeProvider>
-            </AppProvider>
+            <ThemeProvider>
+                <TranslationProvider>
+                    <PortfolioApp />
+                </TranslationProvider>
+            </ThemeProvider>
         </UserPreferencesProvider>
     );
 }

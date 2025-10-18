@@ -329,9 +329,11 @@ function AppContent() {
 
 function App() {
     return (
-      <CommandPaletteProvider>
-        <AppContent />
-      </CommandPaletteProvider>
+      <AppProvider>
+        <CommandPaletteProvider>
+          <AppContent />
+        </CommandPaletteProvider>
+      </AppProvider>
     )
 }
 
