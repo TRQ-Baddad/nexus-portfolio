@@ -1,8 +1,6 @@
 // supabase/functions/validate-api-key/index.ts
-// FIX: Switched to the official, recommended esm.sh CDN for Supabase function types to resolve type definition errors.
 /// <reference types="https://esm.sh/@supabase/functions-js@2" />
 import { serve } from 'https://deno.land/std@0.224.0/http/server.ts';
-import { GoogleGenerativeAI } from 'npm:@google/generative-ai@0.21.0';
 import { corsHeaders } from '../_shared/cors.ts';
 
 declare const Deno: any;
@@ -14,17 +12,31 @@ const validateKey = async (serviceName: string, apiKey: string) => {
     try {
         switch (serviceName) {
             case 'Gemini': {
-                const ai = new GoogleGenerativeAI(apiKey);
-                const model = ai.getGenerativeModel({ model: 'gemini-1.5-flash' });
-                // Simple test with timeout
-                const result = await Promise.race([
-                    model.generateContent('Hello'),
+                // Test with direct REST API using gemini-2.5-flash
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+                
+                const testPromise = fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: 'Hello' }] }]
+                    })
+                });
+                
+                // Simple test with 10 second timeout
+                const res = await Promise.race([
+                    testPromise,
                     new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 10000))
-                ]);
-                const response = await result.response;
-                const text = response.text();
-                isValid = text.length > 0;
-                console.log('Gemini validation successful:', text.substring(0, 50));
+                ]) as Response;
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                    isValid = text.length > 0;
+                    console.log('Gemini validation successful:', text.substring(0, 50));
+                } else {
+                    console.error('Gemini validation failed:', res.status, await res.text());
+                }
                 break;
             }
             case 'Moralis': {
