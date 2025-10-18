@@ -27,7 +27,8 @@ const ToggleSwitch: React.FC<{ enabled: boolean; onChange: () => void; }> = ({ e
 
 
 const WhaleRow: React.FC<{ whale: WhaleWallet; onEdit: () => void; onDelete: () => void; onToggleFeatured: () => void; onRefresh: () => void; isRefreshing: boolean; }> = ({ whale, onEdit, onDelete, onToggleFeatured, onRefresh, isRefreshing }) => {
-    const isPositive = whale.change24h >= 0;
+    const change24h = whale.change24h ?? 0;
+    const isPositive = change24h >= 0;
     const ChainIcon = BLOCKCHAIN_METADATA[whale.blockchain]?.icon || (() => null);
 
     return (
@@ -45,7 +46,7 @@ const WhaleRow: React.FC<{ whale: WhaleWallet; onEdit: () => void; onDelete: () 
                 <p className="font-medium text-neutral-900 dark:text-white">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(whale.totalValue)}</p>
             </td>
             <td className={`p-4 font-medium hidden lg:table-cell ${isPositive ? 'text-success' : 'text-error'}`}>
-                {isPositive ? '+' : ''}{whale.change24h.toFixed(2)}%
+                {isPositive ? '+' : ''}{change24h.toFixed(2)}%
             </td>
             <td className="p-4 hidden xl:table-cell text-center">
                 <ToggleSwitch enabled={whale.isFeatured || false} onChange={onToggleFeatured} />
