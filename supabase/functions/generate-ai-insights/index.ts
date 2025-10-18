@@ -31,8 +31,8 @@ serve(async (req: Request) => {
       });
     }
 
-    // Use REST API directly with v1beta (which has the latest models)
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
+    // Use REST API directly with v1beta and gemini-1.5-flash
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
     
     const geminiResponse = await fetch(apiUrl, {
       method: 'POST',
