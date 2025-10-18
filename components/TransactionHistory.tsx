@@ -76,7 +76,7 @@ const TransactionRow: React.FC<{ transaction: Transaction; onClick: () => void; 
              <td className="p-4">
                 <div className="flex justify-end">
                     <ChainIcon className="w-5 h-5">
-                      <title>{BLOCKCHAIN_METADATA[chain].name}</title>
+                      <title>{BLOCKCHAIN_METADATA[chain]?.name || 'Unknown'}</title>
                     </ChainIcon>
                 </div>
             </td>

@@ -56,7 +56,7 @@ const ActivityItem: React.FC<{ tx: Transaction, whaleAddresses: string[] }> = ({
                     </p>
                     <div className="text-xs text-neutral-500 dark:text-neutral-400 flex items-center space-x-2">
                          <span>{formatRelativeTime(new Date(date))}</span>
-                         <a href={BLOCKCHAIN_METADATA[chain].explorer.txUrl(tx.hash)} target="_blank" rel="noopener noreferrer" className="hover:text-brand-blue">
+                         <a href={BLOCKCHAIN_METADATA[chain]?.explorer?.txUrl(tx.hash) || '#'} target="_blank" rel="noopener noreferrer" className="hover:text-brand-blue">
                             <ExternalLinkIcon className="w-3.5 h-3.5" />
                          </a>
                     </div>

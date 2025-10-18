@@ -44,7 +44,7 @@ export const WhalePortfolio: React.FC<WhalePortfolioProps> = ({ whale, onBack, u
     const [activeTab, setActiveTab] = useState<WhaleTab>('Portfolio');
     const { formatCurrency } = useUserPreferences();
 
-    const metadata = BLOCKCHAIN_METADATA[whale.blockchain];
+    const metadata = BLOCKCHAIN_METADATA[whale.blockchain] || { icon: (() => null), name: 'Unknown', color: 'gray' };
     const Icon = metadata.icon;
     const isPositive = whale.change24h >= 0;
 

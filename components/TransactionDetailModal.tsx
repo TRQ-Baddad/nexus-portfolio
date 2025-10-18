@@ -60,7 +60,7 @@ export const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({ 
     if (!transaction) return null;
 
     const { type, date, tokenSymbol, amount, valueUsd, fromAddress, toAddress, chain, hash } = transaction;
-    const metadata = BLOCKCHAIN_METADATA[chain];
+    const metadata = BLOCKCHAIN_METADATA[chain] || { icon: (() => null), name: 'Unknown', color: 'gray', explorer: { txUrl: () => '#' } };
     const ChainIcon = metadata.icon;
     
     const typeMeta: Record<TransactionType, { icon: React.FC<any>, color: string, label: string }> = {

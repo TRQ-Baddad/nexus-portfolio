@@ -17,7 +17,7 @@ interface WalletListProps {
 }
 
 const WalletItem: React.FC<{ wallet: Wallet, removeWallet: (id: string) => void, onEditWallet: (wallet: Wallet) => void }> = ({ wallet, removeWallet, onEditWallet }) => {
-  const metadata = BLOCKCHAIN_METADATA[wallet.blockchain];
+  const metadata = BLOCKCHAIN_METADATA[wallet.blockchain] || { icon: (() => null), name: 'Unknown', color: 'gray' };
   const Icon = metadata.icon;
   
   return (

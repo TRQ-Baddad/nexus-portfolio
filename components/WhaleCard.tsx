@@ -16,7 +16,7 @@ interface WhaleCardProps {
 }
 
 export const WhaleCard: React.FC<WhaleCardProps> = ({ whale, onView, onRemove }) => {
-    const metadata = BLOCKCHAIN_METADATA[whale.blockchain];
+    const metadata = BLOCKCHAIN_METADATA[whale.blockchain] || { icon: (() => null), name: 'Unknown', color: 'gray' };
     const Icon = metadata.icon;
     const change24h = whale.change24h || 0;
     const isPositive = change24h >= 0;

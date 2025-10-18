@@ -69,7 +69,7 @@ const HoldingsTable: React.FC<{ tokens: Token[], loading: boolean }> = ({ tokens
                     <p className="font-semibold text-neutral-900 dark:text-white">{token.name}</p>
                     <div className="flex items-center space-x-1.5 text-xs text-neutral-500 dark:text-neutral-400">
                     <span>{token.symbol}</span>
-                    <ChainIcon className="w-3.5 h-3.5"><title>{BLOCKCHAIN_METADATA[token.chain].name}</title></ChainIcon>
+                    <ChainIcon className="w-3.5 h-3.5"><title>{BLOCKCHAIN_METADATA[token.chain]?.name || 'Unknown'}</title></ChainIcon>
                     </div>
                 </div>
                 </div>
