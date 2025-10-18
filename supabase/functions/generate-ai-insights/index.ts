@@ -34,14 +34,25 @@ serve(async (req: Request) => {
     // Use REST API directly with v1beta and gemini-2.5-flash (latest stable model)
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
     
+    // Build request body with optional schema support for structured outputs
+    const requestBody: any = {
+      contents: [{
+        parts: [{ text: prompt }]
+      }]
+    };
+
+    // Add schema for structured JSON responses if provided
+    if (schema) {
+      requestBody.generationConfig = {
+        responseMimeType: 'application/json',
+        responseSchema: schema
+      };
+    }
+    
     const geminiResponse = await fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{ text: prompt }]
-        }]
-      })
+      body: JSON.stringify(requestBody)
     });
 
     if (!geminiResponse.ok) {
@@ -52,7 +63,19 @@ serve(async (req: Request) => {
     const data = await geminiResponse.json();
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response';
 
-    return new Response(JSON.stringify({ reply: text }), {
+    // Parse JSON if schema was used, otherwise return plain text
+    let responseData;
+    if (schema) {
+      try {
+        responseData = JSON.parse(text);
+      } catch (e) {
+        responseData = { reply: text }; // Fallback if JSON parsing fails
+      }
+    } else {
+      responseData = { reply: text };
+    }
+
+    return new Response(JSON.stringify(responseData), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     });
