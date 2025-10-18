@@ -517,7 +517,18 @@ export async function fetchPortfolioAssets(wallets: Wallet[]): Promise<{ tokens:
 // --- Mock Implementations for unused features ---
 export async function fetchWhalePortfolio(whale: WhaleWallet): Promise<{ whaleTokens: Token[], whaleNfts: NFT[], whaleTransactions: Transaction[] }> {
     await sleep(700);
-    const { tokens, nfts, transactions } = await fetchPortfolioAssets([whale as unknown as Wallet]);
+    
+    // Convert WhaleWallet to Wallet format
+    const walletData: Wallet = {
+        id: whale.id,
+        address: whale.address,
+        blockchain: whale.blockchain,
+        nickname: whale.name,
+        user_id: 'whale', // Placeholder for whale wallets
+        created_at: new Date().toISOString()
+    };
+    
+    const { tokens, nfts, transactions } = await fetchPortfolioAssets([walletData]);
     return { whaleTokens: tokens, whaleNfts: nfts, whaleTransactions: transactions };
 }
 
