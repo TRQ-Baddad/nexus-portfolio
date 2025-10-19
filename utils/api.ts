@@ -251,26 +251,17 @@ async function fetchEvmAssets(wallets: Wallet[], apiKey: string): Promise<{ toke
                     
                     for (const asset of assets) {
                         const amount = parseFloat(asset.balance) || 0;
-                        const usdValue = parseFloat(asset.balanceUsd) || 0;
                         
-                        // Filter out: dust, invalid data, and unrealistic values
-                        if (amount > 0 && usdValue > 0.01 && usdValue < 1000000000) { // Max $1B per token (filter scams)
-                            const price = usdValue / amount;
-                            
-                            // Skip tokens with unrealistic prices or amounts
-                            if (price > 0 && price < 100000000 && amount < 1000000000000) { // Reasonable limits
-                                walletTokens.push({
-                                    id: `${wallet.id}-${asset.tokenSymbol}`,
-                                    symbol: asset.tokenSymbol,
-                                    name: asset.tokenName,
-                                    amount: amount,
-                                    price: price,
-                                    value: usdValue,
-                                    change24h: 0, // Ankr doesn't provide 24h change, will fetch separately
-                                    chain: wallet.blockchain,
-                                    logoUrl: asset.thumbnail || `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/${wallet.blockchain}/info/logo.png`
-                                });
-                            }
+                        // Filter out dust amounts and unrealistic quantities
+                        if (amount > 0 && amount < 1000000000000) { // Max 1 trillion tokens
+                            walletTokens.push({
+                                id: `${wallet.id}-${asset.tokenSymbol}`,
+                                symbol: asset.tokenSymbol,
+                                name: asset.tokenName,
+                                amount: amount,
+                                chain: wallet.blockchain,
+                                logoUrl: asset.thumbnail || `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/${wallet.blockchain}/info/logo.png`
+                            });
                         }
                     }
                 }
