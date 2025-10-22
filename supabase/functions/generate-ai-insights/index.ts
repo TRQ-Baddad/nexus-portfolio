@@ -31,33 +31,81 @@ serve(async (req: Request) => {
       });
     }
 
-    // Use REST API directly with v1beta and gemini-2.5-flash (latest stable model)
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+    // Retry logic for handling 503 (overloaded) errors
+    const maxRetries = 3;
+    const retryDelays = [1000, 2000, 4000]; // Exponential backoff: 1s, 2s, 4s
     
-    // Build request body with optional schema support for structured outputs
-    const requestBody: any = {
-      contents: [{
-        parts: [{ text: prompt }]
-      }]
-    };
+    let geminiResponse;
+    let lastError;
+    
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+        
+        // Build request body with optional schema support for structured outputs
+        const requestBody: any = {
+          contents: [{
+            parts: [{ text: prompt }]
+          }],
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 1000,
+          }
+        };
 
-    // Add schema for structured JSON responses if provided
-    if (schema) {
-      requestBody.generationConfig = {
-        responseMimeType: 'application/json',
-        responseSchema: schema
-      };
+        // Add schema for structured JSON responses if provided
+        if (schema) {
+          requestBody.generationConfig.responseMimeType = 'application/json';
+          requestBody.generationConfig.responseSchema = schema;
+        }
+        
+        geminiResponse = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestBody)
+        });
+
+        if (geminiResponse.ok) {
+          break; // Success - exit retry loop
+        }
+
+        // Check if it's a retryable error (503 - Service Unavailable)
+        if (geminiResponse.status === 503 && attempt < maxRetries - 1) {
+          console.warn(`Gemini API overloaded (attempt ${attempt + 1}/${maxRetries}), retrying in ${retryDelays[attempt]}ms...`);
+          await new Promise(resolve => setTimeout(resolve, retryDelays[attempt]));
+          continue;
+        }
+
+        // Non-retryable error or final attempt failed
+        const errorText = await geminiResponse.text();
+        lastError = new Error(`Gemini API error (${geminiResponse.status}): ${errorText}`);
+        
+        // If it's a 503 on final attempt, break and use fallback
+        if (geminiResponse.status === 503) {
+          console.error('Gemini API still overloaded after retries, using fallback');
+          break;
+        }
+        
+        throw lastError;
+        
+      } catch (fetchError) {
+        lastError = fetchError;
+        if (attempt < maxRetries - 1) {
+          await new Promise(resolve => setTimeout(resolve, retryDelays[attempt]));
+        }
+      }
     }
-    
-    const geminiResponse = await fetch(apiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody)
-    });
 
-    if (!geminiResponse.ok) {
-      const errorText = await geminiResponse.text();
-      throw new Error(`Gemini API error (${geminiResponse.status}): ${errorText}`);
+    // If all retries failed with 503, return a fallback response
+    if (!geminiResponse || !geminiResponse.ok) {
+      console.warn('Using fallback response due to Gemini unavailability');
+      return new Response(JSON.stringify({ 
+        reply: 'AI insights are temporarily unavailable due to high demand. Please try again in a few moments.',
+        fallback: true 
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200, // Return 200 with fallback message instead of error
+      });
     }
 
     const data = await geminiResponse.json();
