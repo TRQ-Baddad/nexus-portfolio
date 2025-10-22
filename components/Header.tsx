@@ -134,9 +134,9 @@ const ProfileMenu: React.FC<{
         <div className="relative" ref={menuRef}>
             <button 
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-8 h-8 bg-neutral-200 dark:bg-neutral-700 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue focus:ring-offset-neutral-50 dark:focus:ring-offset-neutral-900"
+                className="w-10 h-10 bg-neutral-200 dark:bg-neutral-700 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue focus:ring-offset-neutral-50 dark:focus:ring-offset-neutral-900 overflow-hidden"
             >
-                <img src={user.avatar_url} alt="User" className="rounded-full" />
+                <img src={user.avatar_url} alt="User" className="w-full h-full object-cover rounded-full" />
             </button>
             
             {isOpen && (
