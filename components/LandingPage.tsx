@@ -62,7 +62,7 @@ const Header: React.FC<{ onLogin: () => void; onGetStarted: () => void; }> = ({ 
           <a href="#security" className="hover:text-white transition-colors">Security</a>
           <a href="#testimonials" className="hover:text-white transition-colors">Testimonials</a>
         </div>
-        <div className="flex items-center space-x-4">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-4">
           <Button onClick={onLogin} variant="secondary" size="md" className="!bg-transparent !text-white hover:!bg-neutral-800 hidden sm:flex">
             Log In
           </Button>
@@ -90,7 +90,7 @@ const SectionTitle: React.FC<{ subtitle: string; children: React.ReactNode; }> =
 
 
 const HeroSection: React.FC<{ onGetStarted: () => void; }> = ({ onGetStarted }) => (
-    <div className="relative h-screen min-h-[700px] flex items-center justify-center text-center overflow-hidden pt-20">
+    <div className="relative h-screen min-h-[500px] md:min-h-[700px] flex items-center justify-center text-center overflow-hidden pt-20">
         <div className="absolute inset-0 bg-grid-neutral-800/[0.4] [mask-image:radial-gradient(ellipse_at_center,white,transparent_70%)]"></div>
         <div className="relative z-20 px-4 animate-fade-in">
             <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-neutral-200 to-neutral-500 leading-tight">
@@ -246,7 +246,7 @@ const TestimonialsSection: React.FC = () => (
 const CtaSection: React.FC<{ onGetStarted: () => void; }> = ({ onGetStarted }) => (
   <Section>
     <div className="animate-on-scroll">
-      <div className="relative bg-gradient-to-br from-brand-blue to-brand-purple rounded-2xl text-center p-12 overflow-hidden">
+      <div className="relative bg-gradient-to-br from-brand-blue to-brand-purple rounded-2xl text-center p-6 sm:p-8 md:p-12 overflow-hidden">
         <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-white/10 rounded-full filter blur-3xl opacity-50 animate-pulse"></div>
         <div className="relative z-10">
             <h2 className="text-3xl md:text-4xl font-bold">Ready to take control of your crypto universe?</h2>
