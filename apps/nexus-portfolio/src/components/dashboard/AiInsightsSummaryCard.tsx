@@ -55,9 +55,11 @@ export const AiInsightsSummaryCard: React.FC<AiInsightsSummaryCardProps> = ({ he
                             </div>
                             <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">Your portfolio's risk & health.</p>
                         </div>
-                        <p className="text-sm text-center text-neutral-500 dark:text-neutral-400 mt-4 pt-4 border-t border-neutral-200 dark:border-neutral-700">
-                            Connect wallets with assets to generate a score.
-                        </p>
+                        <div className="flex justify-center mt-4 pt-4 border-t border-neutral-200 dark:border-neutral-700">
+                            <p className="text-sm text-center text-neutral-500 dark:text-neutral-400 max-w-xs">
+                                Connect wallets with assets to generate a score.
+                            </p>
+                        </div>
                     </div>
                 )}
             </Card.Content>

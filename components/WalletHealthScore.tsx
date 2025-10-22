@@ -97,8 +97,8 @@ export const WalletHealthScore: React.FC<WalletHealthScoreProps> = ({ score, sum
                             </p>
                         </div>
                     ) : (
-                         <div className="text-center py-10 text-neutral-500 dark:text-neutral-400">
-                            <p>Connect wallets with assets to generate a score.</p>
+                         <div className="flex justify-center py-10">
+                            <p className="text-center text-sm text-neutral-500 dark:text-neutral-400 max-w-xs">Connect wallets with assets to generate a score.</p>
                         </div>
                     )
                 )}
