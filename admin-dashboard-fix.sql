@@ -62,11 +62,12 @@ CREATE TABLE IF NOT EXISTS service_keys (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Create trigger to keep key_value in sync with api_key
+-- Create trigger to keep key_value in sync with api_key and update timestamp
 CREATE OR REPLACE FUNCTION sync_key_value()
 RETURNS TRIGGER AS $$
 BEGIN
     NEW.key_value := NEW.api_key;
+    NEW.updated_at := NOW();
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -76,6 +77,22 @@ CREATE TRIGGER sync_service_keys_key_value
     BEFORE INSERT OR UPDATE OF api_key ON service_keys
     FOR EACH ROW
     EXECUTE FUNCTION sync_key_value();
+
+-- Also add standard updated_at trigger for other updates (if not already exists)
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS update_service_keys_updated_at ON service_keys;
+CREATE TRIGGER update_service_keys_updated_at 
+    BEFORE UPDATE ON service_keys
+    FOR EACH ROW 
+    WHEN (OLD.* IS DISTINCT FROM NEW.*)
+    EXECUTE FUNCTION update_updated_at_column();
 
 -- Enable RLS on service_keys
 ALTER TABLE service_keys ENABLE ROW LEVEL SECURITY;

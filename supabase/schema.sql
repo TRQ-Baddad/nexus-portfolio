@@ -158,11 +158,12 @@ CREATE TABLE IF NOT EXISTS service_keys (
 -- Index for filtering active service keys
 CREATE INDEX IF NOT EXISTS idx_service_keys_is_active ON service_keys(is_active) WHERE is_active = true;
 
--- Trigger to keep key_value in sync with api_key
+-- Trigger to keep key_value in sync with api_key and update timestamp
 CREATE OR REPLACE FUNCTION sync_key_value()
 RETURNS TRIGGER AS $$
 BEGIN
     NEW.key_value := NEW.api_key;
+    NEW.updated_at := NOW();
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -171,6 +172,13 @@ CREATE TRIGGER sync_service_keys_key_value
     BEFORE INSERT OR UPDATE OF api_key ON service_keys
     FOR EACH ROW
     EXECUTE FUNCTION sync_key_value();
+
+-- Also add standard updated_at trigger for other updates
+CREATE TRIGGER update_service_keys_updated_at 
+    BEFORE UPDATE ON service_keys
+    FOR EACH ROW 
+    WHEN (OLD.* IS DISTINCT FROM NEW.*)
+    EXECUTE FUNCTION update_updated_at_column();
 
 -- System events - System health monitoring and logs
 CREATE TABLE IF NOT EXISTS system_events (
@@ -660,6 +668,9 @@ CREATE TRIGGER update_experiments_updated_at BEFORE UPDATE ON experiments
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_automation_rules_updated_at BEFORE UPDATE ON automation_rules
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_settings_updated_at BEFORE UPDATE ON settings
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Function to auto-create user profile on signup
