@@ -52,11 +52,34 @@ const resolveIpfsUrl = (url?: string | null): string => {
 
 export async function fetchTokenPrices(tokenIds: string[]): Promise<Record<string, { usd: number; usd_24h_change?: number }>> {
     if (tokenIds.length === 0) return {};
-    const uniqueIds = [...new Set(tokenIds)].join(',');
+    const uniqueIds = [...new Set(tokenIds)];
+    
     try {
-        const response = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${uniqueIds}&vs_currencies=usd&include_24hr_change=true`);
-        if (!response.ok) throw new Error('Failed to fetch prices from CoinGecko');
-        return await response.json();
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+        const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+        
+        if (!supabaseUrl || !supabaseKey) {
+            console.error('Missing Supabase credentials');
+            return {};
+        }
+
+        // Call Supabase Edge Function instead of direct CoinGecko
+        const response = await fetch(`${supabaseUrl}/functions/v1/fetch-token-prices`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${supabaseKey}`,
+            },
+            body: JSON.stringify({ ids: uniqueIds }),
+        });
+
+        if (!response.ok) {
+            console.error('Failed to fetch prices:', response.status);
+            return {};
+        }
+
+        const data = await response.json();
+        return data;
     } catch (error) {
         console.error('Error fetching token prices:', error);
         return {};
