@@ -40,7 +40,9 @@ serve(async (req: Request) => {
     
     for (let attempt = 0; attempt < maxRetries; attempt++) {
       try {
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+        // Use Gemini 2.0 Flash for better stability with structured outputs
+        // 2.5 Flash has issues with responseSchema and "thinking" feature causes timeouts
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`;
         
         // Build request body with optional schema support for structured outputs
         const requestBody: any = {
@@ -50,6 +52,11 @@ serve(async (req: Request) => {
           generationConfig: {
             temperature: 0.7,
             maxOutputTokens: 1000,
+            // Disable "thinking" feature to prevent Edge Function timeouts
+            // Only relevant for 2.5 models, but safe to include
+            thinkingConfig: {
+              thinkingBudget: 0
+            }
           }
         };
 

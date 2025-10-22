@@ -18,9 +18,9 @@ serve(async (req) => {
       throw new Error('GEMINI_API_KEY not configured')
     }
 
-    // Use Gemini 2.5-flash with direct REST API
+    // Use Gemini 2.0 Flash for better stability (2.5 has timeout issues)
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -33,6 +33,10 @@ serve(async (req) => {
           generationConfig: {
             temperature: 0.7,
             maxOutputTokens: 500,
+            // Disable "thinking" to prevent timeouts
+            thinkingConfig: {
+              thinkingBudget: 0
+            }
           }
         })
       }
