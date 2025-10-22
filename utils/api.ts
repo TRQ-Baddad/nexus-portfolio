@@ -58,28 +58,38 @@ export async function fetchTokenPrices(tokenIds: string[]): Promise<Record<strin
         const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
         const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
         
-        if (!supabaseUrl || !supabaseKey) {
-            console.error('Missing Supabase credentials');
-            return {};
+        // Try Edge Function first (avoids CORS, has caching)
+        if (supabaseUrl && supabaseKey) {
+            try {
+                const response = await fetch(`${supabaseUrl}/functions/v1/fetch-token-prices`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${supabaseKey}`,
+                    },
+                    body: JSON.stringify({ ids: uniqueIds }),
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    return data;
+                }
+                console.warn('Edge Function unavailable, falling back to direct CoinGecko');
+            } catch (edgeFunctionError) {
+                console.warn('Edge Function error, falling back to direct CoinGecko:', edgeFunctionError);
+            }
         }
 
-        // Call Supabase Edge Function instead of direct CoinGecko
-        const response = await fetch(`${supabaseUrl}/functions/v1/fetch-token-prices`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${supabaseKey}`,
-            },
-            body: JSON.stringify({ ids: uniqueIds }),
-        });
-
+        // Fallback: Direct CoinGecko API (may hit CORS/rate limits)
+        const idsParam = uniqueIds.join(',');
+        const response = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${idsParam}&vs_currencies=usd&include_24hr_change=true`);
+        
         if (!response.ok) {
-            console.error('Failed to fetch prices:', response.status);
+            console.error('CoinGecko API error:', response.status);
             return {};
         }
 
-        const data = await response.json();
-        return data;
+        return await response.json();
     } catch (error) {
         console.error('Error fetching token prices:', error);
         return {};
