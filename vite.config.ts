@@ -18,14 +18,14 @@ export default defineConfig(({ mode }) => {
             manualChunks: undefined, // Disable manual chunking to force rebuild
           }
         },
-        minify: 'terser',
+        minify: isProd ? 'terser' : 'esbuild',
         terserOptions: isProd ? {
           compress: {
             drop_console: true, // Remove console.logs in production
             drop_debugger: true, // Remove debugger statements
             pure_funcs: ['console.log', 'console.info', 'console.debug'], // Remove specific console methods
           }
-        } : {}
+        } : undefined
       },
       define: {
         'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
