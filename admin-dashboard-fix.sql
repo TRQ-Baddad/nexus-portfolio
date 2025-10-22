@@ -168,11 +168,11 @@ DROP FUNCTION IF EXISTS get_recent_activity_feed();
 
 CREATE FUNCTION get_recent_activity_feed()
 RETURNS TABLE (
-    id UUID,
+    id TEXT,
     type TEXT,
-    description TEXT,
-    user_email TEXT,
-    created_at TIMESTAMPTZ
+    details TEXT,
+    value NUMERIC,
+    event_at TIMESTAMPTZ
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -180,13 +180,26 @@ AS $$
 BEGIN
     RETURN QUERY
     SELECT 
-        al.id,
-        al.action as type,
-        COALESCE(al.details->>'description', al.action) as description,
-        u.email as user_email,
-        al.created_at
+        al.id::TEXT,
+        CASE 
+            WHEN al.action = 'create_user' THEN 'signup'
+            WHEN al.action = 'upgrade_user' THEN 'upgrade'
+            WHEN al.action = 'update_user' AND al.details->>'plan' = 'Pro' THEN 'upgrade'
+            ELSE 'signup'  -- Default fallback
+        END as type,
+        CASE 
+            WHEN al.action = 'create_user' THEN 
+                '<b>' || COALESCE(u.name, u.email) || '</b> signed up'
+            WHEN al.action = 'upgrade_user' OR (al.action = 'update_user' AND al.details->>'plan' = 'Pro') THEN 
+                '<b>' || COALESCE(u.name, u.email) || '</b> upgraded to Pro'
+            ELSE 
+                COALESCE(al.details->>'description', al.action)
+        END as details,
+        NULL::NUMERIC as value,  -- Placeholder for revenue tracking
+        al.created_at as event_at
     FROM admin_logs al
     LEFT JOIN users u ON u.id = al.admin_id
+    WHERE al.action IN ('create_user', 'upgrade_user', 'update_user')
     ORDER BY al.created_at DESC
     LIMIT 50;
 END;
