@@ -117,7 +117,9 @@ ON CONFLICT (service_name) DO NOTHING;
 -- =====================================================
 
 -- Get recent transactions (placeholder - transactions from blockchain APIs)
-CREATE OR REPLACE FUNCTION get_recent_transactions()
+DROP FUNCTION IF EXISTS get_recent_transactions();
+
+CREATE FUNCTION get_recent_transactions()
 RETURNS TABLE (
     id UUID,
     user_id UUID,
@@ -137,7 +139,9 @@ END;
 $$;
 
 -- Get all transactions (placeholder)
-CREATE OR REPLACE FUNCTION get_all_transactions(
+DROP FUNCTION IF EXISTS get_all_transactions(TEXT, TEXT);
+
+CREATE FUNCTION get_all_transactions(
     search_query TEXT DEFAULT NULL,
     type_filter TEXT DEFAULT NULL
 )
@@ -159,7 +163,10 @@ END;
 $$;
 
 -- Get recent activity feed
-CREATE OR REPLACE FUNCTION get_recent_activity_feed()
+-- Drop first if exists (needed when changing return type)
+DROP FUNCTION IF EXISTS get_recent_activity_feed();
+
+CREATE FUNCTION get_recent_activity_feed()
 RETURNS TABLE (
     id UUID,
     type TEXT,
