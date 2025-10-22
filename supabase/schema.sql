@@ -190,11 +190,32 @@ CREATE TABLE IF NOT EXISTS admin_logs (
     admin_name TEXT NOT NULL,
     action TEXT NOT NULL,
     target_id UUID,
+    target_user_id UUID,  -- Alias for target_id, used by admin dashboard code
     details JSONB,
     ip_address TEXT,
     user_agent TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Trigger to keep target_id and target_user_id in sync
+CREATE OR REPLACE FUNCTION sync_admin_logs_target()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.target_user_id IS NOT NULL AND NEW.target_id IS NULL THEN
+        NEW.target_id := NEW.target_user_id;
+    END IF;
+    IF NEW.target_id IS NOT NULL AND NEW.target_user_id IS NULL THEN
+        NEW.target_user_id := NEW.target_id;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS sync_admin_logs_target_columns ON admin_logs;
+CREATE TRIGGER sync_admin_logs_target_columns
+    BEFORE INSERT OR UPDATE ON admin_logs
+    FOR EACH ROW
+    EXECUTE FUNCTION sync_admin_logs_target();
 
 -- Whale segments - Grouped whale wallets (future feature support)
 CREATE TABLE IF NOT EXISTS whale_segments (
@@ -376,20 +397,35 @@ CREATE POLICY "Users can delete from their watchlist" ON token_watchlist FOR DEL
 
 -- Announcements policies
 CREATE POLICY "Active announcements are public" ON announcements FOR SELECT USING (status = 'Active');
+CREATE POLICY "Admins can manage announcements" ON announcements FOR ALL USING (
+    EXISTS (SELECT 1 FROM users WHERE users.id = auth.uid() AND users.role IN ('Administrator', 'Content Editor'))
+);
 CREATE POLICY "Service role can manage announcements" ON announcements FOR ALL USING (auth.jwt()->>'role' = 'service_role');
 
 -- Support tickets policies
 CREATE POLICY "Users can view their own tickets" ON support_tickets FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Admins can view all tickets" ON support_tickets FOR SELECT USING (
+    EXISTS (SELECT 1 FROM users WHERE users.id = auth.uid() AND users.role IN ('Administrator', 'Support Agent'))
+);
 CREATE POLICY "Users can create tickets" ON support_tickets FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can update their tickets" ON support_tickets FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Admins can update all tickets" ON support_tickets FOR UPDATE USING (
+    EXISTS (SELECT 1 FROM users WHERE users.id = auth.uid() AND users.role IN ('Administrator', 'Support Agent'))
+);
 CREATE POLICY "Service role can manage tickets" ON support_tickets FOR ALL USING (auth.jwt()->>'role' = 'service_role');
 
 -- Ticket replies policies
 CREATE POLICY "Users can view replies to their tickets" ON ticket_replies FOR SELECT USING (
     EXISTS (SELECT 1 FROM support_tickets WHERE id = ticket_id AND user_id = auth.uid())
 );
+CREATE POLICY "Admins can view all ticket replies" ON ticket_replies FOR SELECT USING (
+    EXISTS (SELECT 1 FROM users WHERE users.id = auth.uid() AND users.role IN ('Administrator', 'Support Agent'))
+);
 CREATE POLICY "Users can reply to their tickets" ON ticket_replies FOR INSERT WITH CHECK (
     EXISTS (SELECT 1 FROM support_tickets WHERE id = ticket_id AND user_id = auth.uid())
+);
+CREATE POLICY "Admins can reply to any ticket" ON ticket_replies FOR INSERT WITH CHECK (
+    EXISTS (SELECT 1 FROM users WHERE users.id = auth.uid() AND users.role IN ('Administrator', 'Support Agent'))
 );
 CREATE POLICY "Service role can manage replies" ON ticket_replies FOR ALL USING (auth.jwt()->>'role' = 'service_role');
 
@@ -406,10 +442,16 @@ CREATE POLICY "Service role can manage service keys" ON service_keys FOR ALL USI
 
 -- System events policies
 CREATE POLICY "System can insert events" ON system_events FOR INSERT WITH CHECK (true);
+CREATE POLICY "Admins can view system events" ON system_events FOR SELECT USING (
+    EXISTS (SELECT 1 FROM users WHERE users.id = auth.uid() AND users.role IN ('Administrator', 'Support Agent'))
+);
 CREATE POLICY "Service role can manage events" ON system_events FOR ALL USING (auth.jwt()->>'role' = 'service_role');
 
 -- Admin logs policies
 CREATE POLICY "Users can create logs" ON admin_logs FOR INSERT WITH CHECK (auth.uid() = admin_id);
+CREATE POLICY "Admins can view all logs" ON admin_logs FOR SELECT USING (
+    EXISTS (SELECT 1 FROM users WHERE users.id = auth.uid() AND users.role IN ('Administrator', 'Support Agent'))
+);
 CREATE POLICY "Service role can manage logs" ON admin_logs FOR ALL USING (auth.jwt()->>'role' = 'service_role');
 
 -- Whale segments policies
@@ -657,17 +699,33 @@ VALUES ('avatars', 'avatars', true)
 ON CONFLICT (id) DO NOTHING;
 
 -- Storage policies for avatars bucket
-CREATE POLICY "Avatar images are publicly accessible" ON storage.objects FOR SELECT
-    USING (bucket_id = 'avatars');
+-- Use IF NOT EXISTS to avoid conflicts if setup-avatar-storage.sql was run
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Public can view avatars' AND tablename = 'objects') THEN
+        CREATE POLICY "Public can view avatars" ON storage.objects FOR SELECT
+            TO public
+            USING (bucket_id = 'avatars');
+    END IF;
 
-CREATE POLICY "Authenticated users can upload avatars" ON storage.objects FOR INSERT
-    WITH CHECK (bucket_id = 'avatars' AND auth.uid()::text = (storage.foldername(name))[1]);
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can upload their own avatar' AND tablename = 'objects') THEN
+        CREATE POLICY "Users can upload their own avatar" ON storage.objects FOR INSERT
+            TO authenticated
+            WITH CHECK (bucket_id = 'avatars' AND auth.uid()::text = (storage.foldername(name))[1]);
+    END IF;
 
-CREATE POLICY "Users can update their own avatars" ON storage.objects FOR UPDATE
-    USING (bucket_id = 'avatars' AND auth.uid()::text = (storage.foldername(name))[1]);
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can update their own avatar' AND tablename = 'objects') THEN
+        CREATE POLICY "Users can update their own avatar" ON storage.objects FOR UPDATE
+            TO authenticated
+            USING (bucket_id = 'avatars' AND auth.uid()::text = (storage.foldername(name))[1]);
+    END IF;
 
-CREATE POLICY "Users can delete their own avatars" ON storage.objects FOR DELETE
-    USING (bucket_id = 'avatars' AND auth.uid()::text = (storage.foldername(name))[1]);
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can delete their own avatar' AND tablename = 'objects') THEN
+        CREATE POLICY "Users can delete their own avatar" ON storage.objects FOR DELETE
+            TO authenticated
+            USING (bucket_id = 'avatars' AND auth.uid()::text = (storage.foldername(name))[1]);
+    END IF;
+END $$;
 
 -- =====================================================
 -- SECTION 7B: TABLE ALIASES (VIEWS) FOR ADMIN DASHBOARD
