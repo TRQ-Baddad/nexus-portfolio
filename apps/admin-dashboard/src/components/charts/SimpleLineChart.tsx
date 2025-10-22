@@ -43,12 +43,18 @@ export const SimpleLineChart: React.FC<SimpleLineChartProps> = ({ data }) => {
         </defs>
         <path d={`${path} V ${height} L 0 ${height} Z`} fill="url(#lineGradient)" />
         <path d={path} fill="none" stroke="#2563EB" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
-        {data.map((point, i) => (
+        {data.map((point, i) => {
+          // Show labels strategically to prevent overlap
+          const showLabel = data.length <= 7 || i === 0 || i === data.length - 1 || i % Math.ceil(data.length / 6) === 0;
+          return (
             <g key={i}>
                 <circle cx={getX(i)} cy={getY(point.value)} r="3" fill="#2563EB" />
-                <text x={getX(i)} y={height - 5} textAnchor="middle" fill="currentColor" className="text-xs text-neutral-500 dark:text-neutral-400">{point.label}</text>
+                {showLabel && (
+                  <text x={getX(i)} y={height - 5} textAnchor="middle" fill="currentColor" className="text-xs text-neutral-500 dark:text-neutral-400">{point.label}</text>
+                )}
             </g>
-        ))}
+          );
+        })}
       </svg>
     </div>
   );
