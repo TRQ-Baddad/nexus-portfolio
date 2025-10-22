@@ -85,7 +85,7 @@ export const ManageAutomationModal: React.FC<ManageAutomationModalProps> = ({ is
             case 1:
                 return (
                     <div className="space-y-4">
-                        <h3 className="font-semibold">Step 1: Choose a Trigger</h3>
+                        <h3 className="font-semibold text-neutral-900 dark:text-white">Step 1: Choose a Trigger</h3>
                         <p className="text-sm text-neutral-500">Select the event that starts this automation.</p>
                         <select value={trigger} onChange={e => setTrigger(e.target.value)} className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-md py-2 px-3 text-neutral-900 dark:text-white sm:text-sm">
                             <option className="bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white">User Signs Up</option>
@@ -97,7 +97,7 @@ export const ManageAutomationModal: React.FC<ManageAutomationModalProps> = ({ is
             case 2:
                 return (
                     <div className="space-y-4">
-                        <h3 className="font-semibold">Step 2: Add Conditions (Optional)</h3>
+                        <h3 className="font-semibold text-neutral-900 dark:text-white">Step 2: Add Conditions (Optional)</h3>
                         <p className="text-sm text-neutral-500">Filter the trigger to specific users. The action will only run if all conditions are met.</p>
                         <div className="space-y-2">
                            {conditions.map((cond) => (
@@ -124,7 +124,7 @@ export const ManageAutomationModal: React.FC<ManageAutomationModalProps> = ({ is
             case 3:
                  return (
                     <div className="space-y-4">
-                        <h3 className="font-semibold">Step 3: Define the Action</h3>
+                        <h3 className="font-semibold text-neutral-900 dark:text-white">Step 3: Define the Action</h3>
                         <p className="text-sm text-neutral-500">What should happen when the trigger and conditions are met?</p>
                         <select value={action} onChange={e => setAction(e.target.value)} className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-md py-2 px-3 text-neutral-900 dark:text-white sm:text-sm">
                             <option className="bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white">Send Notification</option>
@@ -137,7 +137,7 @@ export const ManageAutomationModal: React.FC<ManageAutomationModalProps> = ({ is
             case 4:
                  return (
                     <div className="space-y-4">
-                        <h3 className="font-semibold">Step 4: Review & Save</h3>
+                        <h3 className="font-semibold text-neutral-900 dark:text-white">Step 4: Review & Save</h3>
                         <label htmlFor="auto-name" className="block text-sm font-medium text-neutral-600 dark:text-neutral-300">Automation Name</label>
                         <input id="auto-name" type="text" value={name} onChange={e => setName(e.target.value)} placeholder="e.g., Onboard High Value Users" className="mt-1 block w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-md py-2 px-3 text-neutral-900 dark:text-white placeholder:text-neutral-500 dark:placeholder:text-neutral-400 sm:text-sm" />
                         <div className="text-sm p-4 bg-neutral-100 dark:bg-neutral-900 rounded-md space-y-2">

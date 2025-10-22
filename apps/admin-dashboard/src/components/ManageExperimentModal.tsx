@@ -87,10 +87,10 @@ export const ManageExperimentModal: React.FC<ManageExperimentModalProps> = ({ is
                     </select>
                 </div>
                 <div className="space-y-4 border-t border-neutral-200 dark:border-neutral-700 pt-4">
-                    <h4 className="text-sm font-medium text-neutral-600 dark:text-neutral-300">Variants</h4>
+                    <h4 className="text-sm font-medium text-neutral-900 dark:text-white">Variants</h4>
                     {variants.map((variant, index) => (
                         <div key={variant.id} className="grid grid-cols-1 sm:grid-cols-3 gap-2 items-center">
-                            <label htmlFor={`variant-${variant.id}`} className="font-semibold">{`Variant ${String.fromCharCode(65 + index)}`}</label>
+                            <label htmlFor={`variant-${variant.id}`} className="font-semibold text-neutral-900 dark:text-white">{`Variant ${String.fromCharCode(65 + index)}`}</label>
                              <div className="flex items-center space-x-2 col-span-2">
                                 <input id={`variant-${variant.id}`} type="text" value={variant.value} onChange={e => handleUpdateVariant(variant.id, e.target.value)} placeholder="e.g., #2563EB or 'New Text'" className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-md py-2 px-3 text-neutral-900 dark:text-white placeholder:text-neutral-500 dark:placeholder:text-neutral-400 sm:text-sm font-mono"/>
                             </div>

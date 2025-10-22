@@ -74,7 +74,7 @@ const PermissionGroup: React.FC<{ groupName: string; permissions: { key: string,
                         onChange={e => onChange(perm.key, e.target.checked)}
                         className="rounded border-neutral-300 text-brand-blue focus:ring-brand-blue"
                     />
-                    <span className="text-sm">{perm.label}</span>
+                    <span className="text-sm text-neutral-700 dark:text-neutral-300">{perm.label}</span>
                 </label>
             ))}
         </div>
@@ -128,14 +128,14 @@ export const ManageRoleModal: React.FC<ManageRoleModalProps> = ({ isOpen, onClos
             <div className="space-y-6">
                 <div>
                     <label htmlFor="role-name" className="block text-sm font-medium text-neutral-600 dark:text-neutral-300">Role Name</label>
-                    <input id="role-name" type="text" value={name} onChange={e => setName(e.target.value)} placeholder="e.g., Support Agent" className="mt-1 block w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-md py-2 px-3 sm:text-sm"/>
+                    <input id="role-name" type="text" value={name} onChange={e => setName(e.target.value)} placeholder="e.g., Support Agent" className="mt-1 block w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-md py-2 px-3 text-neutral-900 dark:text-white placeholder:text-neutral-500 dark:placeholder:text-neutral-400 sm:text-sm"/>
                 </div>
                  <div>
                     <label htmlFor="role-desc" className="block text-sm font-medium text-neutral-600 dark:text-neutral-300">Description</label>
-                    <input id="role-desc" type="text" value={description} onChange={e => setDescription(e.target.value)} placeholder="A short description of the role's purpose." className="mt-1 block w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-md py-2 px-3 sm:text-sm"/>
+                    <input id="role-desc" type="text" value={description} onChange={e => setDescription(e.target.value)} placeholder="A short description of the role's purpose." className="mt-1 block w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-md py-2 px-3 text-neutral-900 dark:text-white placeholder:text-neutral-500 dark:placeholder:text-neutral-400 sm:text-sm"/>
                 </div>
                 <div className="space-y-4 border-t border-neutral-200 dark:border-neutral-700 pt-4">
-                    <h3 className="font-semibold text-lg">Permissions</h3>
+                    <h3 className="font-semibold text-lg text-neutral-900 dark:text-white">Permissions</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         {Object.entries(ALL_PERMISSIONS).map(([groupName, perms]) => (
                             <PermissionGroup
