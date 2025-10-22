@@ -111,13 +111,31 @@ serve(async (req: Request) => {
     const data = await geminiResponse.json();
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response';
 
+    console.log('[AI Insights] Raw Gemini response text:', text.substring(0, 200)); // Log first 200 chars
+
     // Parse JSON if schema was used, otherwise return plain text
     let responseData;
     if (schema) {
       try {
+        // When using responseSchema, Gemini returns valid JSON in the text field
         responseData = JSON.parse(text);
-      } catch (e) {
-        responseData = { reply: text }; // Fallback if JSON parsing fails
+        console.log('[AI Insights] Successfully parsed JSON response');
+      } catch (parseError) {
+        console.error('[AI Insights] JSON parsing failed:', parseError);
+        console.error('[AI Insights] Failed text:', text);
+        
+        // Try to extract JSON if it's wrapped in markdown code blocks
+        const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/) || text.match(/```\s*([\s\S]*?)\s*```/);
+        if (jsonMatch) {
+          try {
+            responseData = JSON.parse(jsonMatch[1]);
+            console.log('[AI Insights] Extracted JSON from markdown');
+          } catch (e) {
+            throw new Error(`Failed to parse JSON response: ${parseError.message}`);
+          }
+        } else {
+          throw new Error(`Failed to parse JSON response: ${parseError.message}`);
+        }
       }
     } else {
       responseData = { reply: text };
