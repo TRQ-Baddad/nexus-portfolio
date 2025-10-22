@@ -68,34 +68,34 @@ export const ManageAnnouncementModal: React.FC<ManageAnnouncementModalProps> = (
             <div className="space-y-6">
                  <div>
                     <label htmlFor="anno-title" className="block text-sm font-medium text-neutral-600 dark:text-neutral-300">Title</label>
-                    <input type="text" id="anno-title" value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1 block w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-md py-2 px-3 sm:text-sm"/>
+                    <input type="text" id="anno-title" value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1 block w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-md py-2 px-3 text-neutral-900 dark:text-white placeholder:text-neutral-500 dark:placeholder:text-neutral-400 sm:text-sm"/>
                 </div>
                  <div>
                     <label htmlFor="anno-content" className="block text-sm font-medium text-neutral-600 dark:text-neutral-300">Content</label>
-                    <textarea id="anno-content" rows={4} value={content} onChange={(e) => setContent(e.target.value)} className="mt-1 block w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-md py-2 px-3 sm:text-sm"></textarea>
+                    <textarea id="anno-content" rows={4} value={content} onChange={(e) => setContent(e.target.value)} className="mt-1 block w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-md py-2 px-3 text-neutral-900 dark:text-white placeholder:text-neutral-500 dark:placeholder:text-neutral-400 sm:text-sm"></textarea>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                      <div>
                         <label htmlFor="anno-target" className="block text-sm font-medium text-neutral-600 dark:text-neutral-300">Target</label>
-                        <select id="anno-target" value={target} onChange={e => setTarget(e.target.value as any)} className="mt-1 block w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-md py-2 px-3 sm:text-sm">
-                            <option>All Users</option>
-                            <option>Free Users</option>
-                            <option>Pro Users</option>
+                        <select id="anno-target" value={target} onChange={e => setTarget(e.target.value as any)} className="mt-1 block w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-md py-2 px-3 text-neutral-900 dark:text-white sm:text-sm">
+                            <option className="bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white">All Users</option>
+                            <option className="bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white">Free Users</option>
+                            <option className="bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white">Pro Users</option>
                         </select>
                     </div>
                      <div>
                         <label htmlFor="anno-status" className="block text-sm font-medium text-neutral-600 dark:text-neutral-300">Status</label>
-                        <select id="anno-status" value={status} onChange={e => setStatus(e.target.value as any)} className="mt-1 block w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-md py-2 px-3 sm:text-sm">
-                            <option>Draft</option>
-                            <option>Active</option>
-                            <option>Archived</option>
+                        <select id="anno-status" value={status} onChange={e => setStatus(e.target.value as any)} className="mt-1 block w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-md py-2 px-3 text-neutral-900 dark:text-white sm:text-sm">
+                            <option className="bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white">Draft</option>
+                            <option className="bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white">Active</option>
+                            <option className="bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white">Archived</option>
                         </select>
                     </div>
                      <div>
                         <label htmlFor="anno-style" className="block text-sm font-medium text-neutral-600 dark:text-neutral-300">Style</label>
-                        <select id="anno-style" value={style} onChange={e => setStyle(e.target.value as any)} className="mt-1 block w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-md py-2 px-3 sm:text-sm">
-                            <option>Banner</option>
-                            <option>Modal</option>
+                        <select id="anno-style" value={style} onChange={e => setStyle(e.target.value as any)} className="mt-1 block w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-md py-2 px-3 text-neutral-900 dark:text-white sm:text-sm">
+                            <option className="bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white">Banner</option>
+                            <option className="bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white">Modal</option>
                         </select>
                     </div>
                 </div>

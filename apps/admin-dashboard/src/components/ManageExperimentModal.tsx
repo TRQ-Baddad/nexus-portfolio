@@ -72,18 +72,18 @@ export const ManageExperimentModal: React.FC<ManageExperimentModalProps> = ({ is
             <div className="space-y-6">
                 <div>
                     <label htmlFor="exp-name" className="block text-sm font-medium text-neutral-600 dark:text-neutral-300">Experiment Name</label>
-                    <input id="exp-name" type="text" value={name} onChange={e => setName(e.target.value)} placeholder="e.g., Upgrade Button Color Test" className="mt-1 block w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-md py-2 px-3 sm:text-sm"/>
+                    <input id="exp-name" type="text" value={name} onChange={e => setName(e.target.value)} placeholder="e.g., Upgrade Button Color Test" className="mt-1 block w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-md py-2 px-3 text-neutral-900 dark:text-white placeholder:text-neutral-500 dark:placeholder:text-neutral-400 sm:text-sm"/>
                 </div>
                  <div>
                     <label htmlFor="exp-goal" className="block text-sm font-medium text-neutral-600 dark:text-neutral-300">Primary Goal</label>
-                    <input id="exp-goal" type="text" value={goal} onChange={e => setGoal(e.target.value)} placeholder="e.g., Increase Pro Upgrades" className="mt-1 block w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-md py-2 px-3 sm:text-sm"/>
+                    <input id="exp-goal" type="text" value={goal} onChange={e => setGoal(e.target.value)} placeholder="e.g., Increase Pro Upgrades" className="mt-1 block w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-md py-2 px-3 text-neutral-900 dark:text-white placeholder:text-neutral-500 dark:placeholder:text-neutral-400 sm:text-sm"/>
                 </div>
                  <div>
                     <label htmlFor="exp-segment" className="block text-sm font-medium text-neutral-600 dark:text-neutral-300">Target Segment</label>
-                    <select id="exp-segment" value={segment} onChange={e => setSegment(e.target.value)} className="mt-1 block w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-md py-2 px-3 sm:text-sm">
-                        <option>All New Users</option>
-                        <option>Free Users &gt; $10k</option>
-                        <option>High Value Pro Users</option>
+                    <select id="exp-segment" value={segment} onChange={e => setSegment(e.target.value)} className="mt-1 block w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-md py-2 px-3 text-neutral-900 dark:text-white sm:text-sm">
+                        <option className="bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white">All New Users</option>
+                        <option className="bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white">Free Users &gt; $10k</option>
+                        <option className="bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white">High Value Pro Users</option>
                     </select>
                 </div>
                 <div className="space-y-4 border-t border-neutral-200 dark:border-neutral-700 pt-4">
@@ -92,7 +92,7 @@ export const ManageExperimentModal: React.FC<ManageExperimentModalProps> = ({ is
                         <div key={variant.id} className="grid grid-cols-1 sm:grid-cols-3 gap-2 items-center">
                             <label htmlFor={`variant-${variant.id}`} className="font-semibold">{`Variant ${String.fromCharCode(65 + index)}`}</label>
                              <div className="flex items-center space-x-2 col-span-2">
-                                <input id={`variant-${variant.id}`} type="text" value={variant.value} onChange={e => handleUpdateVariant(variant.id, e.target.value)} placeholder="e.g., #2563EB or 'New Text'" className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-md py-2 px-3 sm:text-sm font-mono"/>
+                                <input id={`variant-${variant.id}`} type="text" value={variant.value} onChange={e => handleUpdateVariant(variant.id, e.target.value)} placeholder="e.g., #2563EB or 'New Text'" className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-md py-2 px-3 text-neutral-900 dark:text-white placeholder:text-neutral-500 dark:placeholder:text-neutral-400 sm:text-sm font-mono"/>
                             </div>
                         </div>
                     ))}
