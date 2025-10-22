@@ -86,6 +86,22 @@ type ActivityEvent = {
     event_at: Date;
 };
 
+const ActivityDetails: React.FC<{ details: string }> = ({ details }) => {
+    const parts = details.split(/(<b>.*?<\/b>)/).filter(Boolean);
+    
+    return (
+        <p className="text-sm font-medium text-neutral-800 dark:text-neutral-200">
+            {parts.map((part, idx) => {
+                const boldMatch = part.match(/<b>(.*?)<\/b>/);
+                if (boldMatch) {
+                    return <span key={idx} className="font-bold">{boldMatch[1]}</span>;
+                }
+                return <span key={idx}>{part}</span>;
+            })}
+        </p>
+    );
+};
+
 const ActivityEventRow: React.FC<{ event: ActivityEvent }> = ({ event }) => {
     const eventMeta: Record<string, { icon: React.FC<any>, color: string }> = {
         signup: { icon: UsersIcon, color: 'text-blue-500' },
@@ -101,7 +117,7 @@ const ActivityEventRow: React.FC<{ event: ActivityEvent }> = ({ event }) => {
                 <Icon className="w-5 h-5" />
             </div>
             <div className="flex-grow">
-                <p className="text-sm font-medium text-neutral-800 dark:text-neutral-200" dangerouslySetInnerHTML={{ __html: event.details }} />
+                <ActivityDetails details={event.details} />
                  <p className="text-xs text-neutral-500 dark:text-neutral-400">{formatRelativeTime(event.event_at)}</p>
             </div>
             {event.value && (
@@ -271,11 +287,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setActiveView }) =
             }
 
             if (recentTickets) {
-                combinedEvents.push(...recentTickets.map(t => ({ id: `ticket-${t.id}`, type: 'new_ticket', details: `${t.user_name} submitted ticket: "<b>${t.subject}</b>"`, event_at: new Date(t.created_at) })));
+                combinedEvents.push(...recentTickets.map(t => ({ id: `ticket-${t.id}`, type: 'new_ticket' as const, details: `${t.user_name} submitted ticket: "<b>${t.subject?.replace(/<[^>]*>/g, '')}</b>"`, event_at: new Date(t.created_at) })));
             }
 
             if (recentWhales) {
-                combinedEvents.push(...recentWhales.map(w => ({ id: `whale-${w.id}`, type: 'new_whale', details: `New whale '<b>${w.name}</b>' was added to the watchlist.`, event_at: new Date(w.created_at) })));
+                combinedEvents.push(...recentWhales.map(w => ({ id: `whale-${w.id}`, type: 'new_whale' as const, details: `New whale '<b>${w.name?.replace(/<[^>]*>/g, '')}</b>' was added to the watchlist.`, event_at: new Date(w.created_at) })));
             }
             
             combinedEvents.sort((a, b) => b.event_at.getTime() - a.event_at.getTime());

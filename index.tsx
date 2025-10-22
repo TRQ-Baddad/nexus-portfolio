@@ -1,11 +1,28 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 import { SpeedInsights } from '@vercel/speed-insights/react';
-import PortfolioApp from './apps/nexus-portfolio/src/App';
-import AdminApp from './apps/admin-dashboard/src/App';
 import { ThemeProvider } from './hooks/useTheme';
 import { TranslationProvider } from './utils/formatters';
 import { UserPreferencesProvider } from './hooks/useUserPreferences';
+
+// Lazy load apps for code splitting and better performance
+const PortfolioApp = lazy(() => import('./apps/nexus-portfolio/src/App'));
+const AdminApp = lazy(() => import('./apps/admin-dashboard/src/App'));
+
+// Loading fallback component
+const LoadingFallback = () => (
+    <div style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        height: '100vh',
+        backgroundColor: '#0a0a0a',
+        color: '#fff',
+        fontSize: '18px'
+    }}>
+        <div>Loading...</div>
+    </div>
+);
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -19,26 +36,28 @@ const path = window.location.pathname;
 let AppToRender;
 
 if (path.startsWith('/admin')) {
-    // Admin App with its specific theme provider
+    // Admin App with lazy loading and suspense
     AppToRender = (
-        // FIX: Added UserPreferencesProvider to provide theme context to the AdminApp and its components.
-        <UserPreferencesProvider>
-            {/* FIX: Removed invalid 'storageKey' prop. Theme persistence is handled by UserPreferencesProvider. */}
-            <ThemeProvider>
-                <AdminApp />
-            </ThemeProvider>
-        </UserPreferencesProvider>
+        <Suspense fallback={<LoadingFallback />}>
+            <UserPreferencesProvider>
+                <ThemeProvider>
+                    <AdminApp />
+                </ThemeProvider>
+            </UserPreferencesProvider>
+        </Suspense>
     );
 } else {
-    // Portfolio App with preferences as the top-level provider
+    // Portfolio App with lazy loading and suspense
     AppToRender = (
-        <UserPreferencesProvider>
-            <ThemeProvider>
-                <TranslationProvider>
-                    <PortfolioApp />
-                </TranslationProvider>
-            </ThemeProvider>
-        </UserPreferencesProvider>
+        <Suspense fallback={<LoadingFallback />}>
+            <UserPreferencesProvider>
+                <ThemeProvider>
+                    <TranslationProvider>
+                        <PortfolioApp />
+                    </TranslationProvider>
+                </ThemeProvider>
+            </UserPreferencesProvider>
+        </Suspense>
     );
 }
 
