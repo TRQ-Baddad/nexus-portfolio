@@ -165,8 +165,8 @@ export const ManageUserModal: React.FC<ManageUserModalProps> = ({ isOpen, onClos
                 {!isEditing && ADMIN_ROLES.includes(role) && (
                     <div>
                         <label htmlFor="user-role" className="block text-sm font-medium text-neutral-600 dark:text-neutral-300">Admin Role</label>
-                        <select id="user-role" value={role} onChange={e => setRole(e.target.value as User['role'])} className="mt-1 block w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-md py-2 px-3 sm:text-sm">
-                            {ADMIN_ROLES.map(r => <option key={r}>{r}</option>)}
+                        <select id="user-role" value={role} onChange={e => setRole(e.target.value as User['role'])} className="mt-1 block w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-md py-2 px-3 text-neutral-900 dark:text-white sm:text-sm">
+                            {ADMIN_ROLES.map(r => <option key={r} className="bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white">{r}</option>)}
                         </select>
                     </div>
                 )}
@@ -174,8 +174,8 @@ export const ManageUserModal: React.FC<ManageUserModalProps> = ({ isOpen, onClos
                 {isEditing && (
                     <div>
                         <label htmlFor="user-role" className="block text-sm font-medium text-neutral-600 dark:text-neutral-300">Role</label>
-                        <select id="user-role" value={role} onChange={e => setRole(e.target.value as User['role'])} disabled={isEditingSelf} className="mt-1 block w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-md py-2 px-3 sm:text-sm disabled:cursor-not-allowed disabled:bg-neutral-100 dark:disabled:bg-neutral-800">
-                            {ALL_ROLES.map(r => <option key={r} value={r}>{r}</option>)}
+                        <select id="user-role" value={role} onChange={e => setRole(e.target.value as User['role'])} disabled={isEditingSelf} className="mt-1 block w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-md py-2 px-3 text-neutral-900 dark:text-white sm:text-sm disabled:cursor-not-allowed disabled:bg-neutral-100 dark:disabled:bg-neutral-800">
+                            {ALL_ROLES.map(r => <option key={r} value={r} className="bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white">{r}</option>)}
                         </select>
                         {isEditingSelf && <p className="text-xs text-neutral-500 mt-1">You cannot change your own role.</p>}
                     </div>
@@ -184,16 +184,16 @@ export const ManageUserModal: React.FC<ManageUserModalProps> = ({ isOpen, onClos
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label htmlFor="user-plan" className="block text-sm font-medium text-neutral-600 dark:text-neutral-300">Plan</label>
-                        <select id="user-plan" value={plan} onChange={e => setPlan(e.target.value as 'Free' | 'Pro')} className="mt-1 block w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-md py-2 px-3 sm:text-sm">
-                            <option>Free</option>
-                            <option>Pro</option>
+                        <select id="user-plan" value={plan} onChange={e => setPlan(e.target.value as 'Free' | 'Pro')} className="mt-1 block w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-md py-2 px-3 text-neutral-900 dark:text-white sm:text-sm">
+                            <option className="bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white">Free</option>
+                            <option className="bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white">Pro</option>
                         </select>
                     </div>
                     <div>
                         <label htmlFor="user-status" className="block text-sm font-medium text-neutral-600 dark:text-neutral-300">Status</label>
-                        <select id="user-status" value={status} onChange={e => setStatus(e.target.value as 'Active' | 'Suspended')} disabled={isEditingSelf} className="mt-1 block w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-md py-2 px-3 sm:text-sm disabled:cursor-not-allowed disabled:bg-neutral-100 dark:disabled:bg-neutral-800">
-                            <option>Active</option>
-                            <option>Suspended</option>
+                        <select id="user-status" value={status} onChange={e => setStatus(e.target.value as 'Active' | 'Suspended')} disabled={isEditingSelf} className="mt-1 block w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-md py-2 px-3 text-neutral-900 dark:text-white sm:text-sm disabled:cursor-not-allowed disabled:bg-neutral-100 dark:disabled:bg-neutral-800">
+                            <option className="bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white">Active</option>
+                            <option className="bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white">Suspended</option>
                         </select>
                         {isEditingSelf && <p className="text-xs text-neutral-500 mt-1">You cannot change your own status.</p>}
                     </div>
