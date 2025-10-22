@@ -745,8 +745,25 @@ END $$;
 -- Create view alias for automation_rules as automations
 CREATE OR REPLACE VIEW automations AS SELECT * FROM automation_rules;
 
--- Create view alias for content_articles as articles  
-CREATE OR REPLACE VIEW articles AS SELECT * FROM content_articles;
+-- Create view alias for content_articles as articles with column aliases for admin dashboard
+CREATE OR REPLACE VIEW articles AS 
+SELECT 
+    id,
+    title,
+    slug,
+    content,
+    excerpt,
+    author_id,
+    author_name,
+    status,
+    tags,
+    featured_image_url,
+    published_at,
+    created_at,
+    updated_at,
+    updated_at AS lastupdated,  -- Alias for admin dashboard compatibility
+    0 AS views                   -- Placeholder for views column (not implemented yet)
+FROM content_articles;
 
 -- Grant permissions on views
 GRANT SELECT, INSERT, UPDATE, DELETE ON automations TO authenticated, service_role;

@@ -20,10 +20,12 @@ SELECT
     next_run_at, run_count, created_at, updated_at
 FROM automation_rules;
 
-CREATE VIEW articles AS 
+CREATE OR REPLACE VIEW articles AS 
 SELECT 
     id, title, slug, content, excerpt, author_id, author_name,
-    status, tags, featured_image_url, published_at, created_at, updated_at
+    status, tags, featured_image_url, published_at, created_at, updated_at,
+    updated_at AS lastupdated,  -- Alias for admin dashboard compatibility
+    0 AS views                   -- Placeholder for views column (not implemented yet)
 FROM content_articles;
 
 CREATE VIEW logs AS 
