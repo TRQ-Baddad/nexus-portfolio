@@ -143,7 +143,7 @@ CREATE TABLE IF NOT EXISTS settings (
     updated_by UUID REFERENCES users(id)
 );
 
--- Service keys - API key management for external services
+-- Service keys table for API key management
 CREATE TABLE IF NOT EXISTS service_keys (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     service_name TEXT NOT NULL UNIQUE,
@@ -154,6 +154,9 @@ CREATE TABLE IF NOT EXISTS service_keys (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Index for filtering active service keys
+CREATE INDEX IF NOT EXISTS idx_service_keys_is_active ON service_keys(is_active) WHERE is_active = true;
 
 -- Trigger to keep key_value in sync with api_key
 CREATE OR REPLACE FUNCTION sync_key_value()
@@ -735,7 +738,7 @@ ON CONFLICT (id) DO UPDATE SET value = EXCLUDED.value;
 INSERT INTO whales (name, address, blockchain, description, total_value, change_24h, is_custom, is_featured) VALUES
 ('Vitalik Buterin', '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', 'ethereum', 'Ethereum co-founder and lead developer', 0, 0, false, true),
 ('Wintermute Trading', '0x00000000ae347930bd1e7b0f35588b92280f9e75', 'ethereum', 'Leading algorithmic trading firm in crypto', 0, 0, false, true),
-('Justin Sun', 'TLa2f6VPqDgRE67v1736s7bJ8Ray5wYjU7', 'solana', 'Founder of TRON and crypto entrepreneur', 0, 0, false, true)
+('Paradigm', '0x6cc5f688a315f3dc28a7781717a9a798a59fda7b', 'ethereum', 'Leading crypto investment firm', 0, 0, false, true)
 ON CONFLICT (address, blockchain) DO NOTHING;
 
 -- Insert default service keys (placeholders)

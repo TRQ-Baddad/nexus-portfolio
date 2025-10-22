@@ -175,14 +175,17 @@ $$;
 -- =====================================================
 -- PART 4: Set your account as Administrator
 -- =====================================================
+-- IMPORTANT: Replace 'your-email@example.com' with YOUR actual email address!
 
--- Update your account (CHANGE THE EMAIL if different!)
+-- Update your account to Administrator
 UPDATE users 
 SET role = 'Administrator', plan = 'Pro', status = 'Active'
-WHERE email = 'vfx.tariq@gmail.com';
+WHERE email = 'your-email@example.com';  -- ⚠️ REPLACE THIS!
 
--- Verify
-SELECT id, email, name, role, plan, status FROM users WHERE email = 'vfx.tariq@gmail.com';
+-- Verify the update worked
+SELECT id, email, name, role, plan, status 
+FROM users 
+WHERE email = 'your-email@example.com';  -- ⚠️ REPLACE THIS!
 
 -- =====================================================
 -- PART 5: Create sample data (optional - for testing)

@@ -93,19 +93,19 @@ export const MyAccountSettings: React.FC = () => {
         
         try {
             const fileExt = file.name.split('.').pop();
-            const fileName = `${userProfile.id}-${Date.now()}.${fileExt}`;
-            const filePath = `avatars/${fileName}`;
+            const fileName = `avatar-${Date.now()}.${fileExt}`;
+            const filePath = `${userProfile.id}/${fileName}`; // Store in user-specific folder
             
             // Upload to Supabase Storage
             const { error: uploadError } = await supabase.storage
-                .from('public')
+                .from('avatars')
                 .upload(filePath, file, { upsert: true });
             
             if (uploadError) throw uploadError;
             
             // Get public URL
             const { data: { publicUrl } } = supabase.storage
-                .from('public')
+                .from('avatars')
                 .getPublicUrl(filePath);
             
             // Update user profile in database
