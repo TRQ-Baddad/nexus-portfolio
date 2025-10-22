@@ -16,7 +16,7 @@ TO authenticated
 WITH CHECK (
     bucket_id = 'public' 
     AND (storage.foldername(name))[1] = 'avatars'
-    AND auth.uid()::text = (storage.filename(name)::text LIKE auth.uid()::text || '%')
+    AND (storage.filename(name) LIKE auth.uid()::text || '%')
 );
 
 -- Allow public read access to avatars
@@ -32,7 +32,7 @@ TO authenticated
 USING (
     bucket_id = 'public' 
     AND (storage.foldername(name))[1] = 'avatars'
-    AND auth.uid()::text = (storage.filename(name)::text LIKE auth.uid()::text || '%')
+    AND (storage.filename(name) LIKE auth.uid()::text || '%')
 );
 
 -- Allow users to delete their own avatars
@@ -42,5 +42,5 @@ TO authenticated
 USING (
     bucket_id = 'public' 
     AND (storage.foldername(name))[1] = 'avatars'
-    AND auth.uid()::text = (storage.filename(name)::text LIKE auth.uid()::text || '%')
+    AND (storage.filename(name) LIKE auth.uid()::text || '%')
 );
