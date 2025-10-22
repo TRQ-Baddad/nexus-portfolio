@@ -16,6 +16,16 @@ export const SimpleDoughnutChart: React.FC<SimpleDoughnutChartProps> = ({ data }
     const radius = size / 2 - 10;
     const hole = radius * 0.6;
     const total = data.reduce((acc, item) => acc + item.value, 0);
+
+    // Handle empty data or zero total
+    if (!data || data.length === 0 || total === 0) {
+        return (
+            <div className="flex items-center justify-center p-4 h-64">
+                <p className="text-sm text-neutral-500 dark:text-neutral-400">No data available</p>
+            </div>
+        );
+    }
+
     let accumulatedAngle = -Math.PI / 2;
 
     return (

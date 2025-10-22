@@ -14,11 +14,21 @@ export const SimpleLineChart: React.FC<SimpleLineChartProps> = ({ data }) => {
   const height = 200;
   const padding = 20;
 
-  const maxVal = Math.max(...data.map(p => p.value));
-  const minVal = 0; // Assuming 0 as the baseline
+  // Handle empty data
+  if (!data || data.length === 0) {
+    return (
+      <div className="w-full h-64 flex items-center justify-center">
+        <p className="text-sm text-neutral-500 dark:text-neutral-400">No data available</p>
+      </div>
+    );
+  }
 
-  const getX = (index: number) => (width / (data.length - 1)) * index;
-  const getY = (value: number) => height - padding - ((value - minVal) / (maxVal - minVal)) * (height - padding * 2);
+  const maxVal = Math.max(...data.map(p => p.value), 0);
+  const minVal = 0; // Assuming 0 as the baseline
+  const range = maxVal - minVal || 1; // Prevent division by zero
+
+  const getX = (index: number) => data.length > 1 ? (width / (data.length - 1)) * index : width / 2;
+  const getY = (value: number) => height - padding - ((value - minVal) / range) * (height - padding * 2);
 
   const path = data.map((point, i) => `${i === 0 ? 'M' : 'L'} ${getX(i)},${getY(point.value)}`).join(' ');
 
