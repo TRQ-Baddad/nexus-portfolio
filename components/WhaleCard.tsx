@@ -18,8 +18,9 @@ interface WhaleCardProps {
 export const WhaleCard: React.FC<WhaleCardProps> = ({ whale, onView, onRemove }) => {
     const metadata = BLOCKCHAIN_METADATA[whale.blockchain] || { icon: (() => null), name: 'Unknown', color: 'gray' };
     const Icon = metadata.icon;
-    const change24h = whale.change24h || 0;
+    const change24h = whale.change24h ?? 0;
     const isPositive = change24h >= 0;
+    const totalValue = whale.totalValue ?? 0;
     const { formatCurrency } = useUserPreferences();
 
     const handleRemove = (e: React.MouseEvent) => {
@@ -75,7 +76,7 @@ export const WhaleCard: React.FC<WhaleCardProps> = ({ whale, onView, onRemove })
             <div className="border-t border-neutral-200 dark:border-neutral-700 pt-4 space-y-3">
                  <div>
                     <p className="text-xs text-neutral-500 dark:text-neutral-400">Portfolio Value</p>
-                    <p className="text-xl font-bold text-neutral-900 dark:text-white">{formatCurrency(whale.totalValue || 0)}</p>
+                    <p className="text-xl font-bold text-neutral-900 dark:text-white">{formatCurrency(totalValue)}</p>
                     <div className={`flex items-center text-xs font-medium mt-1 ${isPositive ? 'text-success' : 'text-error'}`}>
                       {isPositive ? <ArrowUpRightIcon className="w-3 h-3 mr-1" /> : <ArrowDownRightIcon className="w-3 h-3 mr-1" />}
                       <span>{change24h.toFixed(2)}% in 24h</span>

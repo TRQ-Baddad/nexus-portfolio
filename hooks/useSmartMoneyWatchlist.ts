@@ -11,7 +11,60 @@ export const useSmartMoneyWatchlist = () => {
             const { data, error } = await supabase.from('whales').select('*');
             if (error) throw error;
             if (data) {
-                setWhales(data as WhaleWallet[]);
+                // Set whales with loading state initially
+                const whalesWithLoading = (data as WhaleWallet[]).map(whale => ({
+                    ...whale,
+                    isLoading: true
+                }));
+                setWhales(whalesWithLoading);
+                
+                // Fetch real portfolio values for each whale
+                const whalesWithValues = await Promise.all(
+                    (data as WhaleWallet[]).map(async (whale) => {
+                        try {
+                            const tempWallet: Wallet = {
+                                id: `whale-${whale.id}`,
+                                address: whale.address,
+                                blockchain: whale.blockchain,
+                                user_id: 'whale-portfolio',
+                                created_at: new Date().toISOString(),
+                            };
+                            
+                            const { tokens, defiPositions } = await fetchPortfolioAssets([tempWallet]);
+                            
+                            const tokensTotalValue = tokens.reduce((acc, token) => acc + (token.value || 0), 0);
+                            const defiTotalValue = defiPositions.reduce((acc, pos) => acc + pos.valueUsd, 0);
+                            const totalValue = tokensTotalValue + defiTotalValue;
+                            
+                            const totalChange24h = tokens.reduce((acc, token) => {
+                                const value = token.value || 0;
+                                const change = token.change24h || 0;
+                                const changeValue = value / (1 + change / 100) * (change / 100);
+                                return acc + changeValue;
+                            }, 0);
+                            
+                            const yesterdayValue = totalValue - totalChange24h;
+                            const totalChange24hPercent = yesterdayValue !== 0 ? (totalChange24h / yesterdayValue) * 100 : 0;
+                            
+                            return {
+                                ...whale,
+                                totalValue: totalValue,
+                                change24h: totalChange24hPercent,
+                                isLoading: false
+                            };
+                        } catch (error) {
+                            console.error(`Error fetching portfolio for whale ${whale.name}:`, error);
+                            return {
+                                ...whale,
+                                totalValue: 0,
+                                change24h: 0,
+                                isLoading: false
+                            };
+                        }
+                    })
+                );
+                
+                setWhales(whalesWithValues);
             }
         } catch (error) {
              console.error("Error fetching whales:", error);
