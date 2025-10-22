@@ -22,7 +22,7 @@ const SnapshotBackground = () => (
 );
 
 export const PortfolioSnapshot: React.FC<PortfolioSnapshotProps> = ({ portfolioValue, tokens }) => {
-    const { total, change24h, change24hPercent } = portfolioValue;
+    const { total, change24h = 0, change24hPercent = 0 } = portfolioValue;
     const isPositive = change24h >= 0;
 
     const topTokens = tokens.sort((a, b) => b.value - a.value).slice(0, 5);
@@ -78,8 +78,8 @@ export const PortfolioSnapshot: React.FC<PortfolioSnapshotProps> = ({ portfolioV
                                        <p className="font-semibold text-white">
                                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(token.value)}
                                        </p>
-                                       <p className={`text-xs ${token.change24h >= 0 ? 'text-success' : 'text-error'}`}>
-                                           {token.change24h >= 0 ? '+' : ''}{token.change24h.toFixed(2)}%
+                                       <p className={`text-xs ${(token.change24h ?? 0) >= 0 ? 'text-success' : 'text-error'}`}>
+                                           {(token.change24h ?? 0) >= 0 ? '+' : ''}{(token.change24h ?? 0).toFixed(2)}%
                                        </p>
                                     </div>
                                 </li>

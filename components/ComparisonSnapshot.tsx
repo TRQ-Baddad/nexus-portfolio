@@ -28,7 +28,7 @@ const SnapshotBackground = () => (
     </div>
 );
 
-const PortfolioColumn: React.FC<{ title: string; avatarUrl?: string; chainIcon?: React.FC<any>; totalValue: number; changePercent: number; }> = ({ title, avatarUrl, chainIcon: ChainIcon, totalValue, changePercent }) => {
+const PortfolioColumn: React.FC<{ title: string; avatarUrl?: string; chainIcon?: React.FC<any>; totalValue: number; changePercent?: number; }> = ({ title, avatarUrl, chainIcon: ChainIcon, totalValue, changePercent = 0 }) => {
     const isPositive = changePercent >= 0;
     return (
         <div className="text-center">
