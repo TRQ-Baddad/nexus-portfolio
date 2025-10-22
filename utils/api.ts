@@ -16,9 +16,10 @@ const ANKR_CHAIN_MAP: Record<string, string> = {
 
 const COINGECKO_ID_MAP: Record<string, string> = {
     'ETH': 'ethereum', 'WETH': 'weth', 'SOL': 'solana', 'BTC': 'bitcoin', 'MATIC': 'matic-network',
-    'USDC': 'usd-coin', 'ARB': 'arbitrum', 'PEPE': 'pepe', 'BONK': 'bonk', 'WIF': 'dogwifhat',
-    'BNB': 'binancecoin', 'USDT': 'tether', 'LINK': 'chainlink', 'UNI': 'uniswap',
-    'AAVE': 'aave', 'DAI': 'dai', 'SHIB': 'shiba-inu', 'LDO': 'lido-dao',
+    'USDC': 'usd-coin', 'USDT': 'tether', 'DAI': 'dai', 'PYUSD': 'paypal-usd',
+    'ARB': 'arbitrum', 'PEPE': 'pepe', 'BONK': 'bonk', 'WIF': 'dogwifhat',
+    'BNB': 'binancecoin', 'LINK': 'chainlink', 'UNI': 'uniswap',
+    'AAVE': 'aave', 'SHIB': 'shiba-inu', 'LDO': 'lido-dao',
     'MKR': 'maker', 'CRV': 'curve-dao-token', 'stETH': 'staked-ether',
 };
 
